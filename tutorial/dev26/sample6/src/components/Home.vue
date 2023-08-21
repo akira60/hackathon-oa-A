@@ -6,12 +6,14 @@ const router = useRouter()
 
 const message = inject("message")
 const onClick = () => {
+  message.value = 'Hello, Vue.js!'
   router.push({ name: "hello" })
 }
+
 </script>
 
 <template>
   <h1>Sample6</h1>
   <p>{{ message }}</p>
-  <button type="button" @click="onClick" >クリック</button>
+  <button type="button" @click="onClick">クリック</button>
 </template>
