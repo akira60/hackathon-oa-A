@@ -18,9 +18,12 @@ const inputUserName = ref("")
 // #endregion
 
 // #region browser event handler
+
+
 // 入室メッセージをクライアントに送信する
 const onEnter = () => {
   // ユーザー名が入力されているかチェック
+
   if (inputUserName.value.trim() === "") {
     alert('ユーザー名を入力してください。')
   }
@@ -32,6 +35,10 @@ const onEnter = () => {
     userName.value = inputUserName
     // チャット画面へ遷移
     router.push({ name: "chat" })
+
+    socket.emit("enterMyselfEvent", "あなたが接続しました。")
+    socket.emit("enterOtherEvent", "他のクライアントが接続しました。")
+
   }
 }
 // #endregion
