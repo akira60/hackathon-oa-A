@@ -31,6 +31,7 @@ const onPublish = () => {
 
 // 退室メッセージをサーバに送信する
 const onExit = () => {
+  socket.emit("exitEvent", `${userName.value.value}さんが退室しました。`)
 
 }
 
@@ -46,16 +47,17 @@ const onMemo = () => {
 // #region socket event handler
 // サーバから受信した入室メッセージ画面上に表示する
 const onReceiveEnter = (data) => {
-  chatList.push()
+  chatList.push(data)
 }
 
 // サーバから受信した退室メッセージを受け取り画面上に表示する
 const onReceiveExit = (data) => {
-  chatList.push()
+  chatList.push(data)
 }
 
 // サーバから受信した投稿メッセージを画面上に表示する
 const onReceivePublish = (data) => {
+  socket.on('')
   chatList.push()
 }
 // #endregion
@@ -64,13 +66,15 @@ const onReceivePublish = (data) => {
 // イベント登録をまとめる
 const registerSocketEvent = () => {
   // 入室イベントを受け取ったら実行
+  socket.emit("enterEvent", `${userName.value.value}さんが入室しました。`)
   socket.on("enterEvent", (data) => {
-
-  })
+    // 画面上にメッセージを表示
+    onReceiveEnter(data)
+  });
 
   // 退室イベントを受け取ったら実行
   socket.on("exitEvent", (data) => {
-
+    onReceiveExit(data)
   })
 
   // 投稿イベントを受け取ったら実行
