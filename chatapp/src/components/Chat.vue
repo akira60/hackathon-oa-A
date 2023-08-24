@@ -16,18 +16,30 @@ const chatList = reactive([])
 // #endregion
 
 // #region lifecycle
+// onMounted(() => {
+//   registerSocketEvent()
+// })
+
 onMounted(() => {
-  registerSocketEvent()
+  // メッセージ表示イベント（receiveMessageEvent）を受信する
+  socket.on("publishEvent", (data) => {
+    // 画面上にメッセージを表示
+    chatList.unshift(data)
+  })
 })
+
 // #endregion
 
 // #region browser event handler
 // 投稿メッセージをサーバに送信する
 const onPublish = () => {
-  const sendText = userName.value + chatContent.value
-  chatList.push(sendText)
+  const sendText = userName.value.value + 'さん：' + chatContent.value
+  console.log(userName.value.value)
+
   // 入力欄を初期化
   chatContent.value = ""
+  socket.emit("publishEvent",sendText)
+
 
 }
 
