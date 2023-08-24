@@ -21,6 +21,7 @@ const chatList = reactive([])
 // })
 
 onMounted(() => {
+  registerSocketEvent()
   // メッセージ表示イベント（receiveMessageEvent）を受信する
   socket.on("publishEvent", (data) => {
     // 画面上にメッセージを表示
@@ -45,7 +46,7 @@ const onPublish = () => {
 
 // 退室メッセージをサーバに送信する
 const onExit = () => {
-  socket.emit("exitEvent", `${userName.value.value}さんが退室しました。`)
+  socket.emit("exitEvent", `${userName.value}さんが退室しました。`)
 
 }
 
