@@ -94,6 +94,7 @@ button{
 .v-enter-from, .b-leave-to{
     opacity: 0;
 } */
+
 .colorRed{
     color: red;
 }
