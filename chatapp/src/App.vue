@@ -11,8 +11,28 @@ provide("userName", userName)
 </script>
 
 <template>
-  <router-view />
+  <v-app>
+
+    <v-app-bar color="#FBC02D">
+      <v-app-bar-title>
+        Word Wolf
+      </v-app-bar-title>
+    </v-app-bar>
+
+    <div class="container">
+      <router-view />
+    </div>
+
+  </v-app>
+
 </template>
 
 <style scoped>
+.v-application {
+  background: linear-gradient(to right, #f3f1ec, #d9d2d2);
+}
+
+.container{
+  margin-top: 100px;
+}
 </style>

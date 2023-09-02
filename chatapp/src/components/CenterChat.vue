@@ -1,7 +1,7 @@
 <script setup>
 import { inject, provide, ref, reactive, onMounted } from "vue"
 import io from "socket.io-client"
-import Input from "./parts/Input.vue"
+import Scroll from "./parts/Scroll.vue"
 
 // #region global state
 const userName = inject("userName")
@@ -151,7 +151,7 @@ const registerSocketEvent = () => {
           </ul>
       </div> -->
 
-      <Input :style="{ marginTop: '10px', width: '600px' }" />
+      <Scroll :style="{ marginTop: '10px', width: '600px' }" />
 
 
     </div>
@@ -181,7 +181,6 @@ const registerSocketEvent = () => {
 
 .button-exit {
   color: #000;
-  margin-top: 8px;
 }
 
 </style>
