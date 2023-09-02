@@ -4,6 +4,7 @@ import { useRouter } from "vue-router"
 import io from "socket.io-client"
 
 
+
 // #region global state
 let userName = inject("userName")
 // #endregion
@@ -32,7 +33,8 @@ const onEnter = () => {
     // 全体で使用するnameに入力されたユーザー名を格納
     userName.value = inputUserName.value
     // チャット画面へ遷移
-    router.push({ name: "chat" })
+    // router.push({ name: "chat" })
+    router.push({ name: "test" })
 
     socket.emit("enterMyselfEvent", "あなたが接続しました。")
     socket.emit("enterOtherEvent", "他のクライアントが接続しました。")
