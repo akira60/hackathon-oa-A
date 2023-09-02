@@ -1,6 +1,7 @@
 <script setup>
-import { inject, ref, reactive, onMounted } from "vue"
+import { inject, provide, ref, reactive, onMounted } from "vue"
 import io from "socket.io-client"
+import Input from "./parts/Input.vue"
 
 // #region global state
 const userName = inject("userName")
@@ -13,6 +14,8 @@ const socket = io()
 // #region reactive variable
 const chatContent = ref("")
 const chatList = reactive([])
+
+provide("chatList", chatList)
 // #endregion
 
 // #region lifecycle
@@ -105,18 +108,57 @@ const registerSocketEvent = () => {
 <template>
   <div class="mx-auto my-5 px-4">
     <div class="mt-10">
-      <p>ログインユーザ：{{ userName }}さん</p>
-      <textarea v-model="chatContent" variant="outlined" placeholder="発言を入力してください" rows="2" class="area"></textarea>
+
+
+      <!-- <p>ログインユーザ：{{ userName }}さん</p> -->
+
+      <v-textarea
+        label="発言を入力してください。Tips:質問は最大の攻撃です"
+        v-model="chatContent"
+        prepend-icon="$vuetify"
+        variant="solo-inverted"
+        class="area"
+      ></v-textarea>
+
       <div class="mt-5">
+        <v-btn 
+          type="button" 
+          @click="onPublish" 
+          class="button-normal">
+          発言
+        </v-btn>
+      </div>
+      <!-- <textarea v-model="chatContent" variant="outlined" placeholder="発言を入力してください" rows="2" class="area"></textarea> -->
+
+      
+      <!-- <div class="mt-5">
         <button type="button" @click="onPublish" class="button-normal">発言</button>
-      </div>
-      <div class="mt-5" v-if="chatList.length !== 0">
-        <ul>
-          <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
-        </ul>
-      </div>
+      </div> -->
+
+
+      <!-- <div class="mt-5" v-if="chatList.length !== 0">
+        <v-list lines="one">
+          <v-list-item
+            v-for="(chat, i) in chatList"
+            :key="i"
+          >{{ chat }}</v-list-item>
+        </v-list>
+      </div> -->
+
+      <!-- <div class="mt-5" v-if="chatList.length !== 0">
+          <ul>
+            <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
+          </ul>
+      </div> -->
+
+      <Input :style="{ marginTop: '10px', width: '600px' }" />
+
+
     </div>
   </div>
+
+
+
 </template>
 
 <style scoped>
@@ -126,7 +168,6 @@ const registerSocketEvent = () => {
 
 .area {
   width: 500px;
-  border: 1px solid #000;
   margin-top: 8px;
 }
 
