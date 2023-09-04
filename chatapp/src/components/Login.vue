@@ -37,6 +37,8 @@ const onEnter = () => {
     socket.emit("enterMyselfEvent", "あなたが接続しました。")
     socket.emit("enterOtherEvent", "他のクライアントが接続しました。")
 
+    socket.emit("addVoteName", inputUserName.value);
+
   }
 }
 // #endregion

@@ -99,6 +99,10 @@ const registerSocketEvent = () => {
 
   })
 }
+
+  socket.on("sendPlayerName", (playerName) => {
+    console.log(`あなたのプレイヤー名は ${playerName} です。`)
+  })
 // #endregion
 </script>
 
