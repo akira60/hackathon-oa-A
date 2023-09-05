@@ -1,20 +1,27 @@
 <script setup>
+  import { Socket } from "socket.io-client";
   import { ref, computed, resolveDirective } from "vue";
+  import io from "socket.io-client";
 
+  const socket = io();
+  
   // 初期値入力
-  const min = ref(10);
-  const sec = ref(0);
+  const min = ref(0);
+  const sec = ref(5);
   // 開始ボタンが押されたかどうか
   const timerOn = ref(false);
   //setIntervalの返り値を入れておく変数止めるときに使う
   const timerObj = ref(null);
   //ゲーム中かどうか
   const game = ref(true);
+  //サーバーとのやり取り成功か
+  const isSarver = ref(false);
 
   //timerの色初期値は黒
   const isColorRed = ref({
         color: "black"
   });
+
 
   // min, secを動かす関数
   const count = () =>{
@@ -36,33 +43,62 @@
 
   //開始ボタンを押したとき1秒ごとにcount関数を呼び出すtimerOn, gameにtrueを入れる関数
   const start = () =>{
+    socket.emit("start", "ゲームスタート");
     timerObj.value = setInterval(count, 1000);
     timerOn.value = true;
     game.value = true;
   };
+  //サーバーからスタートイベントが届いたら
+  socket.on("start", (data) =>{
+    timerObj.value = setInterval(count, 1000);
+    timerOn.value = true;
+    game.value = true;
+  });
 
   //ストップボタンを押したときsetIntervalを止めてtimerOnにfalseを入れる関数
   const stop = () =>{
+    socket.emit("stop", "ゲームストップ");
     clearInterval(timerObj.value);
     timerOn.value = false;
   };
 
+  //サーバーからストップイベントが届いたら
+    socket.on("stop", (data) =>{
+      clearInterval(timerObj.value);
+      timerOn.value = false;
+    });
   //00:00か終了ボタンが押されたときsetIntervalを止めてgameをfalse,その他を初期値に戻す
   const complete = () =>{
+    socket.emit("finishDiscussion", "ゲーム終了");
     clearInterval(timerObj.value);
     timerOn.value = false;
     game.value = false;
     min.value = 10;
     sec.value = 0;
   };
+  //サーバーからストップイベントが届いたら
+  socket.on("finishDiscussion", (data) =>{
+    clearInterval(timerObj.value);
+    timerOn.value = false;
+    game.value = false;
+    min.value = 10;
+    sec.value = 0;
+  });
 
   //時間が足りないときに1分プラスする関数
   const add = () =>{
+    socket.emit("add", "1分追加");
     min.value += 1;
     isColorRed.value = {
       color: "black"
     };
-  }
+  };
+  socket.on("add", (data) =>{
+    min.value += 1;
+    isColorRed.value = {
+      color: "black"
+    };
+  });
 
   //formatTimeにmin:secの形で代入する
   const formatTime = computed(() =>{
@@ -104,6 +140,7 @@
 <style scoped>
 .timer{
   text-align: center;
+  width: 20%;
 }
 .time {
   display: inline-block;
