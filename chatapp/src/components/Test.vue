@@ -13,11 +13,15 @@ export default {
 </script>
 
 <template>
-  <div style="display: flex;">
+  <div style="display: flex;"
+       class="ma-15"
+  >
     <Cards />
     <CenterChat />
     <Timer />
+    
   </div>
+  
 </template>
 
 <style scoped>

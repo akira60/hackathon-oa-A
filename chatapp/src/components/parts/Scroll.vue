@@ -24,23 +24,31 @@
       v-scroll.self="onScroll"
       class="overflow-y-auto"
       max-height="400"
+      
     >
 
-    <v-banner
-      class="justify-center text-h5 font-weight-light"
-      sticky
-    >
-      Chat logs
-    </v-banner>
-  
-    <div class="mt-5" v-if="chatList.length !== 0">
-        <v-list lines="one">
-          <v-list-item
-            v-for="(chat, i) in chatList"
-            :key="i"
-          >{{ chat }}</v-list-item>
-        </v-list>
-    </div>
+
+      <v-banner
+        class="justify-center text-h5 font-weight-light"
+        sticky
+        :style="{ backgroundColor: '#455A64', color: 'white' }"
+      >
+        <img class="mx-5" style="width: 50px" src="../../images/wolf.png" alt="Overlay Image">
+        Chat logs
+        <img class="mx-5" style="width: 50px" src="../../images/wolf-r.png" alt="Overlay Image">
+      </v-banner>
+    
+      <div class="mt-5" v-if="chatList.length !== 0">
+          <v-list 
+          lines="one"
+          >
+            <v-list-item
+              v-for="(chat, i) in chatList"
+              :key="i"
+            ><v-chip>{{ chat }}</v-chip>
+            </v-list-item>
+          </v-list>
+      </div>
 
     </v-card>
 </template>

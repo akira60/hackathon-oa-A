@@ -21,6 +21,7 @@ provide("userName", userName)
 
     <div class="container">
       <router-view />
+      <img src="./images/wolf.png" alt="Overlay Image">
     </div>
 
   </v-app>
@@ -33,6 +34,6 @@ provide("userName", userName)
 }
 
 .container{
-  margin-top: 100px;
+  
 }
 </style>
