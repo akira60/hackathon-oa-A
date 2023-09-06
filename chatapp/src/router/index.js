@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router"
 import Chat from "../components/Chat.vue"
 import Login from "../components/Login.vue"
+import Vote from "../components/Vote.vue"
 import { vModelText } from "vue"
 
 const router = createRouter({
@@ -21,6 +22,18 @@ const router = createRouter({
           next({ name:"login" })
         }
       },
+    },
+    {
+      path: "/vote/",
+      name: "vote",
+      component: Vote,
+    //   beforeEnter: (to, from, next) => {
+    //     if(from.name === "chat"){
+    //       next()
+    //     } else {
+    //       next({ name:"login" })
+    //     }
+    //   },
     },
   ],
 })

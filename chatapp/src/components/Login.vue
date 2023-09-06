@@ -19,6 +19,7 @@ const inputUserName = ref("")
 
 // #region browser event handler
 
+// const myPlayerName = inject("myPlayerName")
 
 // 入室メッセージをクライアントに送信する
 const onEnter = () => {
@@ -31,13 +32,19 @@ const onEnter = () => {
   else {
     // 全体で使用するnameに入力されたユーザー名を格納
     userName.value = inputUserName.value
-    // チャット画面へ遷移
-    router.push({ name: "chat" })
 
     socket.emit("enterMyselfEvent", "あなたが接続しました。")
     socket.emit("enterOtherEvent", "他のクライアントが接続しました。")
 
-    socket.emit("addVoteName", inputUserName.value);
+    // socket.emit("addVoteName", userName.value)
+    // socket.on("sendPlayerName", (playerName) => {
+    //   myPlayerName.value = playerName
+    //   console.log(`あなたのプレイヤー名は ${playerName} です。`)
+    //   console.log(myPlayerName.value)
+    // })
+
+    // チャット画面へ遷移
+    router.push({ name: "chat" })
 
   }
 }

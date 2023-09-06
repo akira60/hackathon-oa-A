@@ -14,40 +14,52 @@ export default (io, socket) => {
     io.sockets.emit("publishEvent", data)
   })
 
-  const voteName = {};
+  socket.on("finishDiscussion", (myName) => {
+    socket.broadcast.emit("submitMyName",myName)
+  })
+  socket.on("submitVote", (voteName) => {
+    io.sockets.emit("countVote", voteName)
+  })
 
-  io.on('connection', (socket) => {
-    socket.on("addVoteName", (name) => {
-      const playerNumber = Object.keys(voteName).length + 1;
-      const playerName = `player${playerNumber}`;
-      voteName[playerName] = name
+  // 一人がcountを増やすことはできるが、共有できなかったため保留するコード
+  // let count = 0;
+  // socket.on("finishDiscussion", (myName) => {
+  //   socket.broadcast.emit("submitMyName",myName)
+  //   count.push(myName);
+  //   io.sockets.emit("counttest",count.length);
+  //   if (count.length === 4) {
+  //     io.sockets.emit("readyVote",count.length);
+  //   }
+  // })
 
-      socket.emit("sendPlayerName", playerName);
-    })
+  const nameCounts = {};
+  let voteCount = [];
+
+  socket.on("submitVote", (voteName) => {
+    if (!nameCounts[voteName]) {
+      nameCounts[voteName] = 1;
+    } else {
+      nameCounts[voteName]++;
+    }
+
+    voteCount++;
+
+    if (voteCount === 4) {
+
+      let mostVoteName = [];
+      let mostMember = 0;
+
+      for (const name in nameCounts) {
+        const count = nameCounts[name];
+
+        if (count > mostMember) {
+          mostVoteName = [name];
+          mostMember = count;
+        } else if (count === mostMember) {
+          mostVoteName.push(name)
+        }
+      }
+      socket.emit("resultName", { names: mostVoteName, count: mostMember });
+    }
   });
-  
-
-  let count_yonekura = 0;
-  let count_sudo = 0;
-  let count_morita = 0;
-  let count_hara = 0;
-  
-  socket.on("voteEvent", (name) => {
-    if (name == "yonekura")
-      count_yonekura++
-    if (name == "sudo")
-      count_sudo++
-    if (name == "morita")
-      count_morita++
-    if (name == "hara")
-      count_hara++
-
-    let total_count = count_yonekura + count_sudo + count_morita + count_hara;
-
-    if (total_count == 3)
-    maxValue = max(count_yonekura,count_sudo,count_morita,count_hara)
-    io.sockets.emit("voteReturn", ansName)
-  });
-
-  
 }

@@ -1,5 +1,6 @@
 <script setup>
 import { inject, ref, reactive, onMounted } from "vue"
+import { useRouter } from "vue-router"
 import io from "socket.io-client"
 
 // #region global state
@@ -99,10 +100,43 @@ const registerSocketEvent = () => {
 
   })
 }
+  // ーーーーーーーーーーーーーーーーーーーーーここからーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+  const voteList = inject("voteList");
+  const showModal = inject("showModal");
+  let voted = false;
+  const router = useRouter()
 
-  socket.on("sendPlayerName", (playerName) => {
-    console.log(`あなたのプレイヤー名は ${playerName} です。`)
-  })
+  // Timerのcompleteの動作
+  const complete = () => {
+    voted = true;
+    socket.emit("finishDiscussion", userName.value);
+    // 最後にボタンを押した人
+    if ((voteList.length == 3) && (voted == true)) {
+      showModal.value = true;
+      router.push({ name: "vote" })
+      console.log("あ",showModal.value)
+    }
+  }
+
+  // socket.on("counttest", (count) => {
+  //   console.log(count)
+  // })
+
+  socket.on("submitMyName",(myName) => {
+    voteList.push(myName)
+    console.log(voteList,voteList.length)
+    if ((voteList.length == 3) && (voted == true)) {
+      showModal.value = true;
+      router.push({ name: "vote" })
+      console.log("あ",showModal.value)
+    }
+  });
+
+  // socket.on("readyVote", (data) => {
+  //   console.log("readyを受け取る",data)
+  //   router.push({ name: "vote" })
+  // })
+  
 // #endregion
 </script>
 
@@ -126,6 +160,9 @@ const registerSocketEvent = () => {
       <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
     </router-link>
   </div>
+
+  <button type="button" @click="complete" class="button-normal">コンプリート</button>
+
 </template>
 
 <style scoped>
