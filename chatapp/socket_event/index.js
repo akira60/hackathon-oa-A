@@ -32,34 +32,34 @@ export default (io, socket) => {
   //   }
   // })
 
-  const nameCounts = {};
-  let voteCount = [];
+  // const nameCounts = {};
+  // let voteCount = [];
 
-  socket.on("submitVote", (voteName) => {
-    if (!nameCounts[voteName]) {
-      nameCounts[voteName] = 1;
-    } else {
-      nameCounts[voteName]++;
-    }
+  // socket.on("submitVote", (voteName) => {
+  //   if (!nameCounts[voteName]) {
+  //     nameCounts[voteName] = 1;
+  //   } else {
+  //     nameCounts[voteName]++;
+  //   }
 
-    voteCount++;
+  //   voteCount++;
 
-    if (voteCount === 4) {
+  //   if (voteCount === 4) {
 
-      let mostVoteName = [];
-      let mostMember = 0;
+  //     let mostVoteName = [];
+  //     let mostMember = 0;
 
-      for (const name in nameCounts) {
-        const count = nameCounts[name];
+  //     for (const name in nameCounts) {
+  //       const count = nameCounts[name];
 
-        if (count > mostMember) {
-          mostVoteName = [name];
-          mostMember = count;
-        } else if (count === mostMember) {
-          mostVoteName.push(name)
-        }
-      }
-      socket.emit("resultName", { names: mostVoteName, count: mostMember });
-    }
-  });
+  //       if (count > mostMember) {
+  //         mostVoteName = [name];
+  //         mostMember = count;
+  //       } else if (count === mostMember) {
+  //         mostVoteName.push(name)
+  //       }
+  //     }
+  //     socket.emit("resultName", { names: mostVoteName, count: mostMember });
+  //   }
+  // });
 }

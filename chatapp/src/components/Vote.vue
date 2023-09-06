@@ -8,10 +8,6 @@ const socket = io()
 const showModal = inject("showModal");
 const voteList = inject("voteList");
 
-// const startDiscussion = () => {
-//       socket.emit("finishDiscussion", userName.value);
-// };
-
 socket.on("submitMyName",(myName) => {
 	voteList.push(myName)
 	if (voteList.length == 3) {
@@ -28,6 +24,8 @@ let player2 = 0;
 let player3 = 0;
 let player4 = 0;
 let total_count = 0;
+let loserList = [];
+let loserName;
 
 socket.on("countVote", (voteName) => {
 	if (voteName == userName.value){
@@ -44,28 +42,46 @@ socket.on("countVote", (voteName) => {
 	if (total_count == 4) {
 		const playerCounts = [player1, player2, player3, player4];
 		const maxCount = Math.max(...playerCounts);
-		const indexOfMax = playerCounts.indexOf(maxCount);
-
-		let playerWithMaxCount;
-		switch (indexOfMax) {
-		case 0:
-			playerWithMaxCount = userName.value;
-			break;
-		case 1:
-			playerWithMaxCount = voteList[0];
-			break;
-		case 2:
-			playerWithMaxCount = voteList[1];
-			break;
-		case 3:
-			playerWithMaxCount = voteList[2];
-			break;
-		default:
-			playerWithMaxCount = "Unknown";
+		for (let i = 0; i < 4; i++) {
+			if (playerCounts[i] === maxCount) {
+				loserList.push(i);
+			}
 		}
 
-		console.log("最大値:", maxCount);
-		console.log("最大値を持つプレイヤー:", playerWithMaxCount);
+		if (loserList.length === 1) {
+			const indexOfMax = loserList[0];
+			let mostPlayer;
+			switch (indexOfMax) {
+			case 0:
+				mostPlayer = userName.value;
+				break;
+			case 1:
+				mostPlayer = voteList[0];
+				break;
+			case 2:
+				mostPlayer = voteList[1];
+				break;
+			case 3:
+				mostPlayer = voteList[2];
+				break;
+			default:
+				mostPlayert = "エラー回避";
+			}
+
+			showModal.value = false;
+			let resultWin = document.getElementById("result_win");
+			resultWin.removeAttribute("hidden");
+
+			loserName = mostPlayer;
+			console.log("最大値:", maxCount);
+			console.log("最大値を持つプレイヤー:", mostPlayer);
+		} else {
+			showModal.value = false;
+			let resultLose = document.getElementById("result_lose");
+			resultLose.removeAttribute("hidden");
+
+			console.log("狼に逃げられてしまいました。")
+		}
 	}
 });
 
@@ -73,12 +89,21 @@ socket.on("countVote", (voteName) => {
 
 <template>
 	<div>
-		<!-- <button @click="startDiscussion">てすと</button> -->
 		<p>Vote.vueのページ</p>
+
+		<div hidden id="result_win">
+			<h3>選ばれたのは…</h3>
+			<h1>{{ loserName }}</h1>
+		</div>
+
+		<div hidden id="result_lose">
+			<h1>狼に逃げられてしまいました...</h1>
+		</div>
 		
 		<div v-if="showModal" id="overlay">
 			<div id="contents">
 				<h3>誰がワードウルフ？</h3>
+				<img src="../images/question.png" alt="question" class="question">
 				<br>
 				<div class="button-container">
 					<button v-for="name in voteList" :key="name" @click="clickName(name)">{{ name }}</button>
@@ -89,20 +114,33 @@ socket.on("countVote", (voteName) => {
 </template>
 <style scoped>
 .button-container {
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
 }
 
 .button-container button {
-	margin-right: 10px;
-	margin: 5px;
+	/* margin-right: 50px; */
+	margin: 30px 50px 0px 0px;
+	/* margin: 5px;
 	padding: 10px 20px;
 	background-color: #007bff;
-	color: #fff;
+	color: #fff; */
 	border: none;
 	border-radius: 5px;
 	cursor: pointer;
+
+	display: inline-block;
+	padding: 10px 40px;
+	text-decoration: none;
+	color: #FFF;
+	background-image: linear-gradient(#6795fd 0%, #67ceff 100%);
+	transition: .4s;
+	font-size: 17px;
+	font-weight: bold;
+}
+.button-container button:hover{
+	background-image: linear-gradient(#6795fd 0%, #67ceff 70%);
 }
 
 #overlay{
@@ -120,10 +158,18 @@ socket.on("countVote", (voteName) => {
 
 #contents {
 	z-index: 2;
-	width: 50%;
-	padding: 1em;
-	background: #fff;
+	width: 752px;
+	padding: 40px;
+	background: #2b2b2b;
+	text-align: center;
+	color: #fff;
 }
-
+.question {
+	position: absolute;
+	z-index: -1; /* h3の下に配置 */
+	top: 260px;
+	left: 425px;
+	width: 576px;
+}
 </style>
 
