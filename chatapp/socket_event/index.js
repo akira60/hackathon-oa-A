@@ -59,4 +59,41 @@ export default (io, socket) => {
     return array;
   }
 
+  // *********************
+  // Timerイベント
+  //スタートボタンが押された
+  socket.on("start", (data)=>{
+    console.log(data);
+    if(!data){
+      return;
+    }
+    socket.broadcast.emit("start", data);
+  });
+
+  //ストップボタンが押された
+  socket.on("stop", (data)=>{
+    console.log(data);
+    if(!data){
+      return;
+    }
+    socket.broadcast.emit("stop", data);
+  });
+
+  //終了ボタンが押されたもしくは、0秒になった
+  socket.on("finishDiscussion", (data)=>{
+    console.log(data);
+    if(!data){
+      return;
+    }
+    socket.broadcast.emit("finishDiscussion", data);
+  });
+
+  //1分追加ボタンが押された
+  socket.on("add", (data)=>{
+    console.log(data);
+    if(!data){
+      return;
+    }
+    socket.broadcast.emit("add", data);
+  });
 }
