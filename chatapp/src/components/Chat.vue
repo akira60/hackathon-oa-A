@@ -108,9 +108,10 @@ const registerSocketEvent = () => {
 
   // Timerのcompleteの動作
   const complete = () => {
+    // 時間終了後自分の名前を送信
     voted = true;
     socket.emit("finishDiscussion", userName.value);
-    // 最後にボタンを押した人
+    // (最後にボタンを押した人用)
     if ((voteList.length == 3) && (voted == true)) {
       showModal.value = true;
       router.push({ name: "vote" })
@@ -118,24 +119,17 @@ const registerSocketEvent = () => {
     }
   }
 
-  // socket.on("counttest", (count) => {
-  //   console.log(count)
-  // })
-
+  // 投票された名前を受け取る
   socket.on("submitMyName",(myName) => {
     voteList.push(myName)
     console.log(voteList,voteList.length)
+    // もし他の人が投票し終わった、かつ、名前を送り終えていたら
     if ((voteList.length == 3) && (voted == true)) {
       showModal.value = true;
       router.push({ name: "vote" })
       console.log("あ",showModal.value)
     }
   });
-
-  // socket.on("readyVote", (data) => {
-  //   console.log("readyを受け取る",data)
-  //   router.push({ name: "vote" })
-  // })
   
 // #endregion
 </script>

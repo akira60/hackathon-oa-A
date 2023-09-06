@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref, reactive, onMounted, computed } from "vue"
+import { inject,} from "vue"
 import io from "socket.io-client"
 const userName = inject("userName")
 
@@ -15,6 +15,7 @@ socket.on("submitMyName",(myName) => {
 	}
 });
 
+// 投票した名前を送信
 const clickName = (voteName) => {
 	socket.emit("submitVote", voteName)
 };
@@ -27,6 +28,7 @@ let total_count = 0;
 let loserList = [];
 let loserName;
 
+// 投票数集計
 socket.on("countVote", (voteName) => {
 	if (voteName == userName.value){
 		player1++;
@@ -38,6 +40,7 @@ socket.on("countVote", (voteName) => {
 		player4++;
 	}
 
+	// 投票者が四人になったら続ける
 	total_count = player1 + player2 + player3 + player4;
 	if (total_count == 4) {
 		const playerCounts = [player1, player2, player3, player4];
@@ -48,6 +51,7 @@ socket.on("countVote", (voteName) => {
 			}
 		}
 
+		// もし最多投票数を持つプレイヤーが一人ならば
 		if (loserList.length === 1) {
 			const indexOfMax = loserList[0];
 			let mostPlayer;
@@ -67,15 +71,17 @@ socket.on("countVote", (voteName) => {
 			default:
 				mostPlayert = "エラー回避";
 			}
-
+			
+			// モーダルを閉じ、結果を表示
 			showModal.value = false;
 			let resultWin = document.getElementById("result_win");
 			resultWin.removeAttribute("hidden");
 
 			loserName = mostPlayer;
-			console.log("最大値:", maxCount);
-			console.log("最大値を持つプレイヤー:", mostPlayer);
+			console.log("最多投票数:", maxCount);
+			console.log("最多の投票数を持つプレイヤー:", mostPlayer);
 		} else {
+			// 最多投票数を持つプレイヤーが複数いた場合負けとする
 			showModal.value = false;
 			let resultLose = document.getElementById("result_lose");
 			resultLose.removeAttribute("hidden");
@@ -89,8 +95,6 @@ socket.on("countVote", (voteName) => {
 
 <template>
 	<div>
-		<p>Vote.vueのページ</p>
-
 		<div hidden id="result_win">
 			<h3>選ばれたのは…</h3>
 			<h1>{{ loserName }}</h1>
@@ -120,12 +124,7 @@ socket.on("countVote", (voteName) => {
 }
 
 .button-container button {
-	/* margin-right: 50px; */
 	margin: 30px 50px 0px 0px;
-	/* margin: 5px;
-	padding: 10px 20px;
-	background-color: #007bff;
-	color: #fff; */
 	border: none;
 	border-radius: 5px;
 	cursor: pointer;

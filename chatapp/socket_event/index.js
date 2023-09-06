@@ -14,9 +14,12 @@ export default (io, socket) => {
     io.sockets.emit("publishEvent", data)
   })
 
+  // タイマーが0になった時
   socket.on("finishDiscussion", (myName) => {
     socket.broadcast.emit("submitMyName",myName)
   })
+
+  // 投票を行ったら他クライアントへ投票した名前を送信
   socket.on("submitVote", (voteName) => {
     io.sockets.emit("countVote", voteName)
   })
