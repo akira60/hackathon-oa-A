@@ -38,7 +38,7 @@ function createCard() {
 
             Promise.all(promises)
                 .then(() => {
-                    console.log(fetchedThemes);
+                    // console.log(fetchedThemes);
                     resolve(fetchedThemes);
                 })
                 .catch(reject);
