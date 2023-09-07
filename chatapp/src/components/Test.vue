@@ -2,10 +2,12 @@
 import CenterChat from './CenterChat.vue';
 import Cards from './Cards.vue';  // ".vue" 拡張子を追加することをお勧めします（もし必要であれば）
 import Timer from './Timer.vue';
+import Chat from './Chat.vue'
 
 export default {
   components: {
     CenterChat,
+    Chat,
     Cards,
     Timer
   }
@@ -18,6 +20,7 @@ export default {
   >
     <Cards />
     <CenterChat />
+    <!-- <Chat /> -->
     <Timer />
     
   </div>
