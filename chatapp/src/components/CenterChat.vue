@@ -2,6 +2,7 @@
 import { inject, provide, ref, reactive, onMounted } from "vue"
 import io from "socket.io-client"
 import Scroll from "./parts/Scroll.vue"
+import { useRouter } from "vue-router"
 
 // #region global state
 const userName = inject("userName")
@@ -88,6 +89,46 @@ const registerSocketEvent = () => {
 
   })
 }
+
+// ーーーーーーーーーーーーーーーーーーーーーここからーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+const voteList = inject("voteList");
+  const showModal = inject("showModal");
+  let voted = false;
+  const router = useRouter()
+
+  // Timerのcompleteの動作
+  const complete = () => {
+    // 時間終了後自分の名前を送信
+    voted = true;
+    socket.emit("finishDiscussion2", userName.value);
+    console.log('vote')
+    // (最後にボタンを押した人用)
+    if ((voteList.length == 3) && (voted == true)) {
+      showModal.value = true;
+      router.push({ name: "vote" })
+      console.log("あ",showModal.value)
+    }
+  }
+
+  // 投票された名前を受け取る
+  socket.on("finish",(data) => {
+    complete()
+  });
+
+
+  // 投票された名前を受け取る
+  socket.on("submitMyName",(myName) => {
+    voteList.push(myName)
+    console.log(voteList,voteList.length)
+    // もし他の人が投票し終わった、かつ、名前を送り終えていたら
+    if ((voteList.length == 3) && (voted == true)) {
+      showModal.value = true;
+      router.push({ name: "vote" })
+      console.log("あ",showModal.value)
+    }
+  });
+  
+// #endregion
 // #endregion
 </script>
 
