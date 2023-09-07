@@ -49,26 +49,18 @@ const onExit = () => {
 
 
 
-// #region socket event handler
-// サーバから受信した入室メッセージ画面上に表示する
-const onReceiveEnter = (data) => {
-    chatList.unshift(data)
-}
-
-// サーバから受信した退室メッセージを受け取り画面上に表示する
-const onReceiveExit = (data) => {
-    chatList.unshift(data)
-}
 </script>
 
 <template>
     <!-- <div class="mx-auto my-5 px-4"> -->
     <!-- <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1> -->
     <div class="mt-10">
-        <p>ログインユーザ：{{ userName }}さん</p>
-
-        <div v-if="theme">{{ theme }}</div>
-        <div v-if="category">{{ category }}</div>
+        <div class="login_user">ログインユーザ：{{ userName }}さん</div>
+        <v-card color="#455A64" elevation="2" class="category-theme-card">
+            <div v-if="category" class="category-text">{{ category }}</div>
+            <div v-if="theme" class="theme-text">{{ theme }}</div>
+            <div v-else class="theme-waiting">他の人が接続するのを<br>待っています</div>
+        </v-card>
         <router-link to="/" class="link">
             <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
         </router-link>
@@ -97,5 +89,40 @@ const onReceiveExit = (data) => {
 .button-exit {
     color: #000;
     margin-top: 8px;
+}
+
+.category-theme-card {
+    margin-top: 10px;
+    padding: 32px;
+    position: relative;
+    width: 20rem;
+
+}
+
+.category-text {
+    color: white;
+    font-size: 18px;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+}
+
+.theme-text {
+    color: white;
+    font-size: 24px;
+    text-align: center;
+    margin-top: 16px;
+}
+
+.theme-waiting {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 18px;
+    text-align: center;
+    margin-top: 16px;
+}
+
+.login_user {
+    display: inline-block;
+    font-size: 26px;
 }
 </style>

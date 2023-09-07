@@ -19,7 +19,6 @@ export default (io, socket) => {
   // カードを配る
   let players = [];
   let themes = [];
-  // let isThemeSelecting = false;
 
   //　Cardテーブルの一列目を多数派、二列目を少数派、三列目をcategory_idとして取得
   io.on('connection', (socket) => {
@@ -44,6 +43,7 @@ export default (io, socket) => {
               const wolfPlayer = shuffle(players)[0];
               console.log(wolfPlayer.id)
 
+              // ウルフにはウルフのテーマ(word_wolf)を、それ以外には普通のテーマ(word_normal)を送る
               players.forEach(player => {
                 if (player === wolfPlayer) {
                   player.emit('receive-theme', selectedTheme[1]);
@@ -54,11 +54,9 @@ export default (io, socket) => {
                   player.emit('receive-category', selectedTheme[2]);
 
                 }
-                // socket.emit('receive-category', selectedTheme[2]);
 
               });
-              players.forEach(player => {
-              });
+
               players = [];
             })
             .catch((err) => {
@@ -92,36 +90,36 @@ export default (io, socket) => {
   // *********************
   // Timerイベント
   //スタートボタンが押された
-  socket.on("start", (data)=>{
+  socket.on("start", (data) => {
     console.log(data);
-    if(!data){
+    if (!data) {
       return;
     }
     socket.broadcast.emit("start", data);
   });
 
   //ストップボタンが押された
-  socket.on("stop", (data)=>{
+  socket.on("stop", (data) => {
     console.log(data);
-    if(!data){
+    if (!data) {
       return;
     }
     socket.broadcast.emit("stop", data);
   });
 
   //終了ボタンが押されたもしくは、0秒になった
-  socket.on("finishDiscussion", (data)=>{
+  socket.on("finishDiscussion", (data) => {
     console.log(data);
-    if(!data){
+    if (!data) {
       return;
     }
     socket.broadcast.emit("finishDiscussion", data);
   });
 
   //1分追加ボタンが押された
-  socket.on("add", (data)=>{
+  socket.on("add", (data) => {
     console.log(data);
-    if(!data){
+    if (!data) {
       return;
     }
     socket.broadcast.emit("add", data);
