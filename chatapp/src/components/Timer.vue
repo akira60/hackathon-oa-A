@@ -129,11 +129,11 @@
       終了！
     </div>
     <!-- timerOnがfalseの時開始（start関数呼び出し）、trueの時ストップ（stop関数呼び出し）ボタンを表示 -->
-    <v-btn v-on:click="start" v-if="!timerOn" class="Button" color="primary" elevation="2">スタート</v-btn>
-    <v-btn v-on:click="stop" v-if="timerOn" class="Button" color="primary" elevation="2">ストップ</v-btn>
+    <v-btn v-on:click="start" v-if="!timerOn" class="Button" color="#455A64" elevation="2">スタート</v-btn>
+    <v-btn v-on:click="stop" v-if="timerOn" class="Button" color="#455A64" elevation="2">ストップ</v-btn>
     <!-- 追加ボタン（add関数を呼び出し）を表示 -->
-    <v-btn v-on:click="add" class="Button" color="primary" elevation="2">１分追加</v-btn>
-    <v-btn v-on:click="complete" class="Button" color="primary" elevation="2">終了</v-btn>
+    <v-btn v-on:click="add" class="Button" color="#455A64" elevation="2">１分追加</v-btn>
+    <v-btn v-on:click="complete" class="Button" color="#455A64" elevation="2">終了</v-btn>
   </div>
 </template>
 

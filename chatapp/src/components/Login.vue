@@ -45,14 +45,17 @@ const onEnter = () => {
 </script>
 
 <template>
-  <div class="mx-auto my-5 px-4">
-    <h1 class="text-h3 font-weight-medium">Vue.js Chat サンプル</h1>
+  <div class="mx-auto ma-15 px-4">
+    <h1 class="text-h3 font-weight-medium">Login</h1>
     <div class="mt-10">
       <p>ユーザー名</p>
       <input type="text" v-model="inputUserName" class="user-name-text" />
     </div>
     <button type="button" @click="onEnter" class="button-normal">入室する</button>
   </div>
+
+   
+
 </template>
 
 <style scoped>

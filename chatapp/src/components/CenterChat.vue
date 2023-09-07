@@ -16,19 +16,13 @@ const chatContent = ref("")
 const chatList = reactive([])
 
 provide("chatList", chatList)
-// #endregion
-
-// #region lifecycle
-// onMounted(() => {
-//   registerSocketEvent()
-// })
 
 onMounted(() => {
   registerSocketEvent()
   // メッセージ表示イベント（receiveMessageEvent）を受信する
   socket.on("publishEvent", (data) => {
     // 画面上にメッセージを表示
-    chatList.unshift(data)
+    chatList.push(data)
   })
 })
 
@@ -57,7 +51,7 @@ const onExit = () => {
 const onMemo = () => {
   // メモの内容を表示
   chatContent.value = userName.value + "さんのメモ：" + chatContent.value
-  chatList.unshift(chatContent.value)
+  chatList.push(chatContent.value)
 
   // 入力欄を初期化
   chatContent.value = ""
@@ -67,22 +61,14 @@ const onMemo = () => {
 // #region socket event handler
 // サーバから受信した入室メッセージ画面上に表示する
 const onReceiveEnter = (data) => {
-  chatList.unshift(data)
+  chatList.push(data)
 }
 
 // サーバから受信した退室メッセージを受け取り画面上に表示する
 const onReceiveExit = (data) => {
-  chatList.unshift(data)
+  chatList.push(data)
 }
 
-// サーバから受信した投稿メッセージを画面上に表示する
-// const onReceivePublish = (data) => {
-//   socket.on('')
-//   chatList.push()
-// }
-// #endregion
-
-// #region local methods
 // イベント登録をまとめる
 const registerSocketEvent = () => {
   // 入室イベントを受け取ったら実行
@@ -106,52 +92,29 @@ const registerSocketEvent = () => {
 </script>
 
 <template>
-  <div class="mx-auto my-5 px-4">
-    <div class="mt-10">
+  <div class="mx-auto my-1 px-4">
+    <div class="mt-1">
 
-
-      <!-- <p>ログインユーザ：{{ userName }}さん</p> -->
-
-      <v-textarea
-        label="発言を入力してください。Tips:質問は最大の攻撃です"
-        v-model="chatContent"
-        prepend-icon="$vuetify"
-        variant="solo-inverted"
-        class="area"
-      ></v-textarea>
+      <Scroll :style="{width: '600px', height: '350px' }" />
 
       <div class="mt-5">
+
         <v-btn 
           type="button" 
           @click="onPublish" 
           class="button-normal">
           発言
         </v-btn>
+
+        <!-- prepend-icon="$vuetify" -->
+        <v-textarea
+        label="発言を入力してください。Tips:質問は最大の攻撃です"
+        v-model="chatContent"
+        variant="solo-inverted"
+        class="area"
+        ></v-textarea>
+
       </div>
-      <!-- <textarea v-model="chatContent" variant="outlined" placeholder="発言を入力してください" rows="2" class="area"></textarea> -->
-
-      
-      <!-- <div class="mt-5">
-        <button type="button" @click="onPublish" class="button-normal">発言</button>
-      </div> -->
-
-
-      <!-- <div class="mt-5" v-if="chatList.length !== 0">
-        <v-list lines="one">
-          <v-list-item
-            v-for="(chat, i) in chatList"
-            :key="i"
-          >{{ chat }}</v-list-item>
-        </v-list>
-      </div> -->
-
-      <!-- <div class="mt-5" v-if="chatList.length !== 0">
-          <ul>
-            <li class="item mt-4" v-for="(chat, i) in chatList" :key="i">{{ chat }}</li>
-          </ul>
-      </div> -->
-
-      <Scroll :style="{ marginTop: '10px', width: '600px' }" />
 
 
     </div>
@@ -167,7 +130,7 @@ const registerSocketEvent = () => {
 }
 
 .area {
-  width: 500px;
+  width: 600px;
   margin-top: 8px;
 }
 
