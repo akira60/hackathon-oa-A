@@ -7,8 +7,10 @@ const userName = inject("userName")
 // #endregion
 
 // #region local variable
-const socket = io()
+let socket = io()
 const theme = ref(null);
+const category = ref(null);
+
 // #endregion
 
 
@@ -18,30 +20,26 @@ const theme = ref(null);
 // })
 
 onMounted(() => {
+    socket = io();
+    socket.emit('join');
     socket.on('receive-theme', (receivedTheme) => {
         theme.value = receivedTheme;
+        console.log(theme.value);
+
+    })
+    socket.on('receive-category', (receivedCategory) => {
+        category.value = receivedCategory;
+        console.log(receivedCategory);
     })
 })
 
 
 onBeforeUnmount(() => {
     socket.disconnect();
+    socket.off('receive-theme')
 });
 
 
-
-// #region browser event handler
-// 投稿メッセージをサーバに送信する
-const onPublish = () => {
-    const sendText = userName.value + 'さん：' + chatContent.value
-    console.log(userName.value)
-
-    // 入力欄を初期化
-    chatContent.value = ""
-    socket.emit("publishEvent", sendText)
-
-
-}
 
 // 退室メッセージをサーバに送信する
 const onExit = () => {
@@ -49,16 +47,7 @@ const onExit = () => {
 
 }
 
-// メモを画面上に表示する
-const onMemo = () => {
-    // メモの内容を表示
-    chatContent.value = userName.value + "さんのメモ：" + chatContent.value
-    chatList.unshift(chatContent.value)
 
-    // 入力欄を初期化
-    chatContent.value = ""
-}
-// #endregion
 
 // #region socket event handler
 // サーバから受信した入室メッセージ画面上に表示する
@@ -70,35 +59,6 @@ const onReceiveEnter = (data) => {
 const onReceiveExit = (data) => {
     chatList.unshift(data)
 }
-
-// サーバから受信した投稿メッセージを画面上に表示する
-// const onReceivePublish = (data) => {
-//   socket.on('')
-//   chatList.push()
-// }
-// #endregion
-
-// #region local methods
-// イベント登録をまとめる
-const registerSocketEvent = () => {
-    // 入室イベントを受け取ったら実行
-    socket.emit("enterEvent", `${userName.value}さんが入室しました。`)
-    socket.on("enterEvent", (data) => {
-        // 画面上にメッセージを表示
-        onReceiveEnter(data)
-    });
-
-    // 退室イベントを受け取ったら実行
-    socket.on("exitEvent", (data) => {
-        onReceiveExit(data)
-    })
-
-    // 投稿イベントを受け取ったら実行
-    socket.on("publishEvent", (data) => {
-
-    })
-}
-// #endregion
 </script>
 
 <template>
@@ -108,6 +68,7 @@ const registerSocketEvent = () => {
         <p>ログインユーザ：{{ userName }}さん</p>
 
         <div v-if="theme">{{ theme }}</div>
+        <div v-if="category">{{ category }}</div>
         <router-link to="/" class="link">
             <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
         </router-link>

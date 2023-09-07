@@ -1,3 +1,5 @@
+import createCard from "../db/index.js";
+
 export default (io, socket) => {
   // 入室メッセージをクライアントに送信する
   socket.on("enterEvent", (data) => {
@@ -16,40 +18,68 @@ export default (io, socket) => {
 
   // カードを配る
   let players = [];
-  const themes = [
-    ["ショッピングモール", "商店街"],
-    ["加湿器", "エアコン"],
-    ["スマートスピーカー"], ["タブレット端末"],
-  ]
+  let themes = [];
+  // let isThemeSelecting = false;
 
+  //　Cardテーブルの一列目を多数派、二列目を少数派、三列目をcategory_idとして取得
   io.on('connection', (socket) => {
-    players.push(socket);
+    // なぜかクライアント側で何回も接続が起こっている。それを防ぐために1ユーザーあたりのjoinの回数を制限
+    if (!socket.listeners('join').length) {
+      socket.on('join', () => {
+        players.push(socket);
+        console.log(players.length)
+        console.log(`Client connected: ${socket.id}`);
 
-    // とりあえずデフォルト4人でスタート
-    if (players.length === 4) {
-      //テーマを選ぶ
-      const selectedTheme = shuffle(themes)[0];
-      // ウルフを選ぶ
-      const wolfPlayer = shuffle(players)[0];
+        // とりあえずデフォルト4人でスタート
+        if (players.length === 4) {
+          createCard()
+            .then((fetchedThemes) => {
+              themes = fetchedThemes;
 
-      players.forEach(player => {
-        if (player === wolfPlayer) {
-          player.emit('receive-theme', selectedTheme[1]);
-        } else {
-          player.emit('receive-theme', selectedTheme[0]);
+              //テーマを選ぶ
+              const selectedTheme = shuffle(themes)[0];
+              console.log(selectedTheme);
+
+              // ウルフを選ぶ
+              const wolfPlayer = shuffle(players)[0];
+              console.log(wolfPlayer.id)
+
+              players.forEach(player => {
+                if (player === wolfPlayer) {
+                  player.emit('receive-theme', selectedTheme[1]);
+                  player.emit('receive-category', selectedTheme[2]);
+
+                } else {
+                  player.emit('receive-theme', selectedTheme[0]);
+                  player.emit('receive-category', selectedTheme[2]);
+
+                }
+                // socket.emit('receive-category', selectedTheme[2]);
+
+              });
+              players.forEach(player => {
+              });
+              players = [];
+            })
+            .catch((err) => {
+              console.log(err);
+            });
         }
       });
 
-      players = [];
     }
+
+
 
     socket.on('disconnect', () => {
       const index = players.indexOf(socket);
+      console.log(`Client disconnected: ${socket.id}`);
       if (index > -1) {
         players.splice(index, 1);
       }
     });
   });
+
 
   const shuffle = (array) => {
     for (let i = array.length - 1; i > 0; i--) {
