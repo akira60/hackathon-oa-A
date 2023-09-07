@@ -1,3 +1,4 @@
+<!-- このファイルは使用しません -->
 <script setup>
 import { inject, ref, reactive, onMounted } from "vue"
 import { useRouter } from "vue-router"
@@ -40,7 +41,7 @@ const onPublish = () => {
 
   // 入力欄を初期化
   chatContent.value = ""
-  socket.emit("publishEvent",sendText)
+  socket.emit("publishEvent", sendText)
 
 
 }
