@@ -120,8 +120,7 @@ socket.on("countVote", (voteName) => {
 		<div class="box"></div>
 		<div id="result_win" class="block, heading-034">
 			<h1>選ばれたのは…</h1>
-			<h1>すどうさんです。</h1>
-			<!-- <h1>{{ selectedName }}でした。</h1> -->
+			<h1>{{ selectedName }}でした。</h1>
 			<h1>あなたは見事狼を当てました！</h1>
 		</div>
 
