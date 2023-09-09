@@ -4,6 +4,7 @@ import io from "socket.io-client"
 
 // #region global state
 const userName = inject("userName")
+const whoWolf = inject("whoWolf");
 // #endregion
 
 // #region local variable
@@ -25,12 +26,18 @@ onMounted(() => {
     socket.on('receive-theme', (receivedTheme) => {
         theme.value = receivedTheme;
         console.log(theme.value);
-
     })
     socket.on('receive-category', (receivedCategory) => {
         category.value = receivedCategory;
         console.log(receivedCategory);
     })
+    socket.on("wolfNotice", (data) => {
+        if (data == "wolf"){
+            whoWolf.value = "me";
+        } else if (data = "human") {
+            whoWolf.value = "other";
+        }
+    });
 })
 
 

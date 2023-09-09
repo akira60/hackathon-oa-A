@@ -5,12 +5,14 @@ import { provide, ref ,reactive} from "vue"
 const userName = ref("")
 const voteList = reactive([]);
 const showModal = ref(false);
+const whoWolf = ref("");
 // #endregion
 
 // #region global variable
 provide("userName", userName)
 provide("voteList", voteList)
 provide("showModal", showModal)
+provide("whoWolf", whoWolf)
 // #endregion
 
 </script>
@@ -38,7 +40,7 @@ provide("showModal", showModal)
   background: linear-gradient(to right, #f3f1ec, #d9d2d2);
 }
 
-.container{
+/* .container{
   
-}
+} */
 </style>

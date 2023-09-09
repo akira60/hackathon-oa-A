@@ -16,6 +16,58 @@ export default (io, socket) => {
     io.sockets.emit("publishEvent", data)
   })
 
+  // *********************
+  // Timerイベント
+  //スタートボタンが押された
+  socket.on("start", (data) => {
+    console.log(data);
+    if (!data) {
+      return;
+    }
+    socket.broadcast.emit("start", data);
+  });
+
+  //ストップボタンが押された
+  socket.on("stop", (data) => {
+    console.log(data);
+    if (!data) {
+      return;
+    }
+    socket.broadcast.emit("stop", data);
+  });
+
+  //1分追加ボタンが押された
+  socket.on("add", (data) => {
+    console.log(data);
+    if (!data) {
+      return;
+    }
+    socket.broadcast.emit("add", data);
+  });
+
+  // 0:00の時名前を送る
+  socket.on("finishDiscussion", (myName) => {
+    socket.broadcast.emit("submitMyName",myName);
+  })
+
+  //終了ボタンを誰かが押したら
+  socket.on("endButtonSubmit", (myName) => {
+    console.log(myName);
+    if (!myName) {
+      return;
+    }
+    // 他の人を終了させ、ボタンを押した人の名前を送る
+    socket.broadcast.emit("finish", myName);
+  });
+
+  // 投票を行ったら他クライアントへ投票した名前を送信
+  socket.on("submitVote", (voteName) => {
+    io.sockets.emit("countVote", voteName);
+  })
+
+  socket.on("imwolf", (wolfName) => {
+    socket.broadcast.emit("submitWolf", wolfName);
+  });
 
   // カードを配る
   let players = [];
@@ -49,11 +101,12 @@ export default (io, socket) => {
                 if (player === wolfPlayer) {
                   player.emit('receive-theme', selectedTheme[1]);
                   player.emit('receive-category', selectedTheme[2]);
+                  player.emit("wolfNotice", "wolf");
 
                 } else {
                   player.emit('receive-theme', selectedTheme[0]);
                   player.emit('receive-category', selectedTheme[2]);
-
+                  player.emit("wolfNotice", "human");
                 }
 
               });
@@ -87,101 +140,5 @@ export default (io, socket) => {
     }
     return array;
   }
-
-  // *********************
-  // Timerイベント
-  //スタートボタンが押された
-  socket.on("start", (data) => {
-    console.log(data);
-    if (!data) {
-      return;
-    }
-    socket.broadcast.emit("start", data);
-  });
-
-  //ストップボタンが押された
-  socket.on("stop", (data) => {
-    console.log(data);
-    if (!data) {
-      return;
-    }
-    socket.broadcast.emit("stop", data);
-  });
-
-  //終了ボタンが押されたもしくは、0秒になった
-  socket.on("finishDiscussion", (data) => {
-    console.log(data);
-    if (!data) {
-
-      return;
-    }
-    socket.broadcast.emit("finish", data);
-  });
-
-  // タイマーが0になった時
-  socket.on("finish", (data) => {
-    socket.broadcast.emit("finish",data)
-  })
-
-  //1分追加ボタンが押された
-  socket.on("add", (data) => {
-    console.log(data);
-    if (!data) {
-      return;
-    }
-    socket.broadcast.emit("add", data);
-  });
-
-  // タイマーが0になった時
-  socket.on("finishDiscussion2", (myName) => {
-    socket.broadcast.emit("submitMyName",myName)
-  })
-
-  // 投票を行ったら他クライアントへ投票した名前を送信
-  socket.on("submitVote", (voteName) => {
-    io.sockets.emit("countVote", voteName)
-  })
-
-  // 一人がcountを増やすことはできるが、共有できなかったため保留するコード
-  // let count = 0;
-  // socket.on("finishDiscussion", (myName) => {
-  //   socket.broadcast.emit("submitMyName",myName)
-  //   count.push(myName);
-  //   io.sockets.emit("counttest",count.length);
-  //   if (count.length === 4) {
-  //     io.sockets.emit("readyVote",count.length);
-  //   }
-  // })
-
-  // const nameCounts = {};
-  // let voteCount = [];
-
-  // socket.on("submitVote", (voteName) => {
-  //   if (!nameCounts[voteName]) {
-  //     nameCounts[voteName] = 1;
-  //   } else {
-  //     nameCounts[voteName]++;
-  //   }
-
-  //   voteCount++;
-
-  //   if (voteCount === 4) {
-
-  //     let mostVoteName = [];
-  //     let mostMember = 0;
-
-  //     for (const name in nameCounts) {
-  //       const count = nameCounts[name];
-
-  //       if (count > mostMember) {
-  //         mostVoteName = [name];
-  //         mostMember = count;
-  //       } else if (count === mostMember) {
-  //         mostVoteName.push(name)
-  //       }
-  //     }
-  //     socket.emit("resultName", { names: mostVoteName, count: mostMember });
-  //   }
-  // });
 
 }
