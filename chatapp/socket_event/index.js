@@ -20,17 +20,38 @@ export default (io, socket) => {
   // カードを配る
   let players = [];
   let themes = [];
+  let userList = [];
+
+
 
   //　Cardテーブルの一列目を多数派、二列目を少数派、三列目をcategory_idとして取得
   io.on('connection', (socket) => {
     // なぜかクライアント側で何回も接続が起こっている。それを防ぐために1ユーザーあたりのjoinの回数を制限
     if (!socket.listeners('join').length) {
+
+
+      // ユーザーリストにユーザーを追加
+      /* ここから */
+
+      socket.on("userList", (userName) => {
+        // ユーザー名異なる場合は追加
+        if (userName && !userList.includes(userName)) {
+          userList.push(userName);
+          socket.userName = userName;
+          io.emit('updateUserList', userList);
+        }
+      })
+
+      /* ここまで */
+
+
       socket.on('join', () => {
+
+        // とりあえずデフォルト4人でスタート
         players.push(socket);
         console.log(players.length)
         console.log(`Client connected: ${socket.id}`);
 
-        // とりあえずデフォルト4人でスタート
         if (players.length === 4) {
           createCard()
             .then((fetchedThemes) => {
@@ -76,6 +97,13 @@ export default (io, socket) => {
       if (index > -1) {
         players.splice(index, 1);
       }
+
+      // ユーザーリストからユーザー削除
+      if (socket.userName && userList.includes(socket.userName)) {
+        userList = userList.filter(user => user !== socket.userName);
+      }
+
+      io.emit('updateUserList', userList);
     });
   });
 
@@ -120,7 +148,7 @@ export default (io, socket) => {
 
   // タイマーが0になった時
   socket.on("finish", (data) => {
-    socket.broadcast.emit("finish",data)
+    socket.broadcast.emit("finish", data)
   })
 
   //1分追加ボタンが押された
@@ -134,7 +162,7 @@ export default (io, socket) => {
 
   // タイマーが0になった時
   socket.on("finishDiscussion2", (myName) => {
-    socket.broadcast.emit("submitMyName",myName)
+    socket.broadcast.emit("submitMyName", myName)
   })
 
   // 投票を行ったら他クライアントへ投票した名前を送信

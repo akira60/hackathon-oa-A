@@ -34,24 +34,24 @@ const router = createRouter({
       name: "cards",
       component: Cards,
       // 一旦コンポーネントの動作確認するためにコメントアウト
-      // beforeEnter: (to, from, next) => {
-      //   if (from.name === "login") {
-      //     next()
-      //   } else {
-      //     next({ name: "login" })
-      //   }
-      // }
+      beforeEnter: (to, from, next) => {
+        if (from.name === "login") {
+          next()
+        } else {
+          next({ name: "login" })
+        }
+      }
     }, {
       path: "/vote/",
       name: "vote",
       component: Vote,
-    //   beforeEnter: (to, from, next) => {
-    //     if(from.name === "chat"){
-    //       next()
-    //     } else {
-    //       next({ name:"login" })
-    //     }
-    //   },
+      //   beforeEnter: (to, from, next) => {
+      //     if(from.name === "chat"){
+      //       next()
+      //     } else {
+      //       next({ name:"login" })
+      //     }
+      //   },
     }
   ]
 })
