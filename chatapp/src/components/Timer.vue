@@ -1,7 +1,8 @@
 <script setup>
   import { Socket } from "socket.io-client";
-  import { ref, computed, resolveDirective } from "vue";
+  import { inject, ref, computed, resolveDirective } from "vue";
   import io from "socket.io-client";
+  import { useRouter } from "vue-router"
 
   const socket = io();
   
@@ -21,7 +22,6 @@
   const isColorRed = ref({
         color: "black"
   });
-
 
   // min, secを動かす関数
   const count = () =>{
@@ -63,26 +63,9 @@
   };
 
   //サーバーからストップイベントが届いたら
-    socket.on("stop", (data) =>{
-      clearInterval(timerObj.value);
-      timerOn.value = false;
-    });
-  //00:00か終了ボタンが押されたときsetIntervalを止めてgameをfalse,その他を初期値に戻す
-  const complete = () =>{
-    socket.emit("finishDiscussion", "ゲーム終了");
+  socket.on("stop", (data) =>{
     clearInterval(timerObj.value);
     timerOn.value = false;
-    game.value = false;
-    min.value = 10;
-    sec.value = 0;
-  };
-  //サーバーからストップイベントが届いたら
-  socket.on("finishDiscussion", (data) =>{
-    clearInterval(timerObj.value);
-    timerOn.value = false;
-    game.value = false;
-    min.value = 10;
-    sec.value = 0;
   });
 
   //時間が足りないときに1分プラスする関数
@@ -114,6 +97,70 @@
     return timeStrings;
   });
 
+  // ーーーーーーーーーーーーーーここから変更ーーーーーーーーーーーーーー
+
+  const userName = inject("userName")
+  const voteList = inject("voteList");
+  const showModal = inject("showModal");
+  let sent = false;
+  const router = useRouter()
+
+  const defReset = () => {
+    clearInterval(timerObj.value);
+    timerOn.value = false;
+    game.value = false;
+    min.value = 10;
+    sec.value = 0;
+  }
+
+  //00:00か終了ボタンが押されたときsetIntervalを止めてgameをfalse,その他を初期値に戻す
+  // ▶▶ 0:00になった時のみの動作とする
+  const complete = () =>{
+    defReset();
+    // 自分の名前を送り送信済みに
+    socket.emit("finishDiscussion", userName.value);
+    sent = true;
+    // もし他の人全員の名前を受け取り終わっていたら投票へ
+    if (voteList.length == 3) {
+      showModal.value = true;
+      router.push({ name: "vote" })
+      // ラグなどでループしないためにオフに
+      sent = false;
+    }
+  };
+
+  // 自分が終了ボタンを押したら
+  const endButton = () => {
+    defReset();
+    // 自分の名前を送り送信済みにする
+    socket.emit("endButtonSubmit", userName.value);
+    sent = true;
+  }
+
+  // サーバーからストップイベントが届いたら
+  // ▶▶　他の人が終了ボタンを押したら
+  socket.on("finish", (otherName) =>{
+    defReset();
+    // 終了ボタンを押した人の名前を受け取る
+    voteList.push(otherName);
+    // 自分の名前を送り送信済みにする
+    socket.emit("finishDiscussion", userName.value);
+    sent = true;
+  });
+
+  // 他の人の名前を受け取る
+  socket.on("submitMyName",(otherName) => {
+      voteList.push(otherName);
+      console.log(voteList);
+      // もし他の人全員の名前を受け取り終わっている、かつ、自分の名前を送り終えていたら投票へ
+      if ((voteList.length == 3) && (sent == true)) {
+        showModal.value = true;
+        router.push({ name: "vote" })
+        // ラグなどでループしないためにオフに
+        sent = false;
+      }
+  });
+
 </script>
 
 <template>
@@ -133,7 +180,7 @@
     <v-btn v-on:click="stop" v-if="timerOn" class="Button" color="#455A64" elevation="2">ストップ</v-btn>
     <!-- 追加ボタン（add関数を呼び出し）を表示 -->
     <v-btn v-on:click="add" class="Button" color="#455A64" elevation="2">１分追加</v-btn>
-    <v-btn v-on:click="complete" class="Button" color="#455A64" elevation="2">終了</v-btn>
+    <v-btn v-on:click="endButton" class="Button" color="#455A64" elevation="2">終了</v-btn>
   </div>
 </template>
 

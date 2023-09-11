@@ -1,9 +1,10 @@
 <script setup>
-import { inject,} from "vue"
+import { inject } from "vue"
 import io from "socket.io-client"
-const userName = inject("userName")
+const userName = inject("userName");
+const whoWolf = inject("whoWolf");
 
-const socket = io()
+const socket = io();
 
 const showModal = inject("showModal");
 const voteList = inject("voteList");
@@ -15,9 +16,18 @@ socket.on("submitMyName",(myName) => {
 	}
 });
 
+let voted = false;
+
 // 投票した名前を送信
 const clickName = (voteName) => {
-	socket.emit("submitVote", voteName)
+	if (voted == false){
+		socket.emit("submitVote", voteName);
+		voted = true;
+		let divContents = document.getElementById("contents");
+		let divWaiting = document.getElementById("waiting");
+		divContents.setAttribute("hidden","");
+		divWaiting.removeAttribute("hidden")
+	}
 };
 
 let player1 = 0;
@@ -25,8 +35,8 @@ let player2 = 0;
 let player3 = 0;
 let player4 = 0;
 let total_count = 0;
-let loserList = [];
-let loserName;
+let selectedList = [];
+let selectedName;
 
 // 投票数集計
 socket.on("countVote", (voteName) => {
@@ -47,13 +57,13 @@ socket.on("countVote", (voteName) => {
 		const maxCount = Math.max(...playerCounts);
 		for (let i = 0; i < 4; i++) {
 			if (playerCounts[i] === maxCount) {
-				loserList.push(i);
+				selectedList.push(i);
 			}
 		}
 
 		// もし最多投票数を持つプレイヤーが一人ならば
-		if (loserList.length === 1) {
-			const indexOfMax = loserList[0];
+		if (selectedList.length === 1) {
+			const indexOfMax = selectedList[0];
 			let mostPlayer;
 			switch (indexOfMax) {
 			case 0:
@@ -71,22 +81,34 @@ socket.on("countVote", (voteName) => {
 			default:
 				mostPlayert = "エラー回避";
 			}
-			
-			// モーダルを閉じ、結果を表示
-			showModal.value = false;
-			let resultWin = document.getElementById("result_win");
-			resultWin.removeAttribute("hidden");
-
-			loserName = mostPlayer;
-			console.log("最多投票数:", maxCount);
-			console.log("最多の投票数を持つプレイヤー:", mostPlayer);
+			selectedName = mostPlayer
+			// もし自分が狼だったら名前を送り負けの画面にする
+			if (whoWolf.value == "me") {
+				socket.emit("imwolf", userName.value);
+				showModal.value = false;
+				let resultLose = document.getElementById("result_lose");
+				resultLose.removeAttribute("hidden");
+			// 自分が狼ではなかったら
+			} else {
+				socket.on("submitWolf", (wolfName) => {
+					// 狼を当てられていたら勝ちの画面にする
+					if (wolfName == mostPlayer) {
+						showModal.value = false;
+						let resultLose = document.getElementById("result_win");
+						resultLose.removeAttribute("hidden");
+					// 狼ではない人だったら負けの画面にする
+					} else {
+						showModal.value = false;
+						let resultLose = document.getElementById("result_lose");
+						resultLose.removeAttribute("hidden");
+					}
+				});
+			}
 		} else {
-			// 最多投票数を持つプレイヤーが複数いた場合負けとする
+			// 最多投票数を持つプレイヤーが複数いた場合逃げられた（勝負は負け）の画面にする
 			showModal.value = false;
-			let resultLose = document.getElementById("result_lose");
+			let resultLose = document.getElementById("result_escape");
 			resultLose.removeAttribute("hidden");
-
-			console.log("狼に逃げられてしまいました。")
 		}
 	}
 });
@@ -95,19 +117,33 @@ socket.on("countVote", (voteName) => {
 
 <template>
 	<div>
-		<div hidden id="result_win">
-			<h3>選ばれたのは…</h3>
-			<h1>{{ loserName }}</h1>
+		<div class="box"></div>
+		<div hidden id="result_win" class="block, heading-034">
+			<h1>選ばれたのは…</h1>
+			<h1>{{ selectedName }}でした。</h1>
+			<h1>あなたは見事狼を当てました！</h1>
 		</div>
 
-		<div hidden id="result_lose">
+		<div hidden id="result_lose" class="block, heading-034">
+			<h1>選ばれたのは…</h1>
+			<h1>{{ selectedName }}でした。</h1>
+			<h1>ですが狼ではなかったようです…</h1>
+		</div>
+
+		<div hidden id="result_escape" class="block, heading-034">
 			<h1>狼に逃げられてしまいました...</h1>
+			<h1>投票数が同じになってしまったようです</h1>
+			<h1></h1>
 		</div>
 		
 		<div v-if="showModal" id="overlay">
-			<div id="contents">
-				<h3>誰がワードウルフ？</h3>
-				<img src="../images/question.png" alt="question" class="question">
+			<div id="waiting" class="contents" hidden>
+				<h3>あなたは怪しい人を指名しました。</h3>
+				<h3>票が集まるまで待ちましょう。</h3>
+			</div>
+			<div id="contents" class="contents">
+				<h2 class="heading-031">誰がワードウルフ？</h2>
+				<!-- <img src="../images/question.png" alt="question" class="question"> -->
 				<br>
 				<div class="button-container">
 					<button v-for="name in voteList" :key="name" @click="clickName(name)">{{ name }}</button>
@@ -155,7 +191,7 @@ socket.on("countVote", (voteName) => {
 	justify-content: center;
 }
 
-#contents {
+.contents {
 	z-index: 2;
 	width: 752px;
 	padding: 40px;
@@ -169,6 +205,87 @@ socket.on("countVote", (voteName) => {
 	top: 260px;
 	left: 425px;
 	width: 576px;
+}
+
+.heading-031 {
+    position: relative;
+    padding: .3em 0 .2em 1em;
+    border-bottom: 3px solid #2589d0;
+    color: #ffffff;
+    width: 300px;
+    margin-left: 30%;
+}
+
+.heading-031::before {
+    position: absolute;
+    top: 0;
+    left: .3em;
+    transform: rotate(55deg);
+    height: 11px;
+    width: 12px;
+    background: #2589d0;
+    content: '';
+}
+
+.heading-031::after {
+    position: absolute;
+    transform: rotate(15deg);
+    top: .6em;
+    left: 0;
+    height: 8px;
+    width: 8px;
+    background: #2589d0;
+    content: '';
+}
+
+.box{
+	height: 50px;
+}
+.block{
+	position: absolute;
+	top: 100px;
+	left: calc(50% - 450px / 2);
+}
+.heading-034 {
+    position: relative;
+    margin: 0 0 25px calc(50% - 500px / 2);
+    padding: .5em .8em;
+    background-color: rgb(251, 192, 45);
+    color: #fff;
+    width: 40%;
+}
+
+.heading-034::before {
+    position: absolute;
+    top: 0;
+    left: -9px;
+    z-index: 1;
+    width: 5px;
+    height: 135%;
+    border-radius: 3px;
+    background-color: #600;
+    content: '';
+}
+
+.heading-034 h1::before,
+.heading-034 h1::after {
+    position: absolute;
+    left: -9px;
+    width: 20px;
+    height: 3px;
+    border-radius: 3px;
+    background-color: #c99;
+    content: '';
+}
+
+.heading-034 h1::before {
+    top: 44%;
+    transform: rotate(-25deg);
+}
+
+.heading-034 h1::after {
+    top: 54%;
+    transform: rotate(25deg);
 }
 </style>
 
