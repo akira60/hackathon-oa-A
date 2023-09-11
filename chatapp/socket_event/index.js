@@ -69,6 +69,16 @@ export default (io, socket) => {
     socket.broadcast.emit("submitWolf", wolfName);
   });
 
+  socket.on("submitWolftheme", (wolf) => {
+    console.log("receiveWolftheme 動いてます！")
+    socket.broadcast.emit("receiveWolftheme", wolf);
+  });
+  
+  socket.on("submitHumantheme", (human) => {
+    console.log("piyopiyo")
+    socket.broadcast.emit("receiveHumantheme", human);
+  });
+
   // カードを配る
   let players = [];
   let themes = [];
