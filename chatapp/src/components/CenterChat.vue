@@ -22,7 +22,7 @@ onMounted(() => {
   // メッセージ表示イベント（receiveMessageEvent）を受信する
   socket.on("publishEvent", (data) => {
     // 画面上にメッセージを表示
-    chatList.push(data)
+    chatList.unshift(data)
   })
 })
 
