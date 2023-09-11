@@ -1,8 +1,11 @@
 <script setup>
-import { inject } from "vue"
+import { inject, ref } from "vue"         //ーーーーーref追加ーーーーー
 import io from "socket.io-client"
 const userName = inject("userName");
 const whoWolf = inject("whoWolf");
+const theme = inject("theme");         //ーーーーー追加ーーーーー
+const wolftheme = ref("");          //ーーーーー追加ーーーーー
+const humantheme = ref("");         //ーーーーー追加ーーーーー
 
 const socket = io();
 
@@ -85,6 +88,11 @@ socket.on("countVote", (voteName) => {
 			// もし自分が狼だったら名前を送り負けの画面にする
 			if (whoWolf.value == "me") {
 				socket.emit("imwolf", userName.value);
+				socket.emit("submitWolftheme", theme.value);         //ーーーーー追加ーーーーー
+					wolftheme.value = theme.value;
+				socket.on("receiveHumantheme", (data) => {         //ーーーーー追加ーーーーー
+					humantheme.value = data;                    //ーーーーー追加ーーーーー
+				})
 				showModal.value = false;
 				let resultLose = document.getElementById("result_lose");
 				resultLose.removeAttribute("hidden");
@@ -103,6 +111,11 @@ socket.on("countVote", (voteName) => {
 						resultLose.removeAttribute("hidden");
 					}
 				});
+				socket.emit("submitHumantheme", theme.value);
+				socket.on("receiveWolftheme", (data) => {         //ーーーーー追加ーーーーー
+					wolftheme.value = data;
+					humantheme.value = theme.value;
+				})
 			}
 		} else {
 			// 最多投票数を持つプレイヤーが複数いた場合逃げられた（勝負は負け）の画面にする
@@ -116,24 +129,26 @@ socket.on("countVote", (voteName) => {
 </script>
 
 <template>
-	<div>
+	<div class="ma-10">
 		<div class="box"></div>
 		<div hidden id="result_win" class="block, heading-034">
 			<h1>選ばれたのは…</h1>
 			<h1>{{ selectedName }}でした。</h1>
 			<h1>あなたは見事狼を当てました！</h1>
+			<h4>狼のテーマ{{ wolftheme }}　他の人のテーマ{{ humantheme }}</h4>         <!-- ーーーーー追加ーーーーー -->
 		</div>
 
 		<div hidden id="result_lose" class="block, heading-034">
 			<h1>選ばれたのは…</h1>
 			<h1>{{ selectedName }}でした。</h1>
 			<h1>ですが狼ではなかったようです…</h1>
+			<h4>狼のテーマ{{ wolftheme }}　他の人のテーマ{{ humantheme }}</h4>         <!-- ーーーーー追加ーーーーー -->
 		</div>
 
 		<div hidden id="result_escape" class="block, heading-034">
 			<h1>狼に逃げられてしまいました...</h1>
 			<h1>投票数が同じになってしまったようです</h1>
-			<h1></h1>
+			<h4>狼のテーマ{{ wolftheme }}　他の人のテーマ{{ humantheme }}</h4>         <!-- ーーーーー追加ーーーーー -->
 		</div>
 		
 		<div v-if="showModal" id="overlay">
@@ -288,4 +303,3 @@ socket.on("countVote", (voteName) => {
     transform: rotate(25deg);
 }
 </style>
-

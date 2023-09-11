@@ -6,6 +6,7 @@ const userName = ref("")
 const voteList = reactive([]);
 const showModal = ref(false);
 const whoWolf = ref("");
+const theme = ref(null);
 // #endregion
 
 // #region global variable
@@ -13,6 +14,7 @@ provide("userName", userName)
 provide("voteList", voteList)
 provide("showModal", showModal)
 provide("whoWolf", whoWolf)
+provide("theme", theme)
 // #endregion
 
 </script>

@@ -9,7 +9,7 @@ const whoWolf = inject("whoWolf");
 
 // #region local variable
 let socket = io()
-const theme = ref(null);
+const theme = inject("theme");
 const category = ref(null);
 
 // #endregion
