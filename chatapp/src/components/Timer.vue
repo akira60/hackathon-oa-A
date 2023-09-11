@@ -1,117 +1,165 @@
 <script setup>
   import { Socket } from "socket.io-client";
-  import { ref, computed, resolveDirective } from "vue";
+  import { inject, ref, computed, resolveDirective } from "vue";
   import io from "socket.io-client";
+  import { useRouter } from "vue-router"
 
-  const socket = io();
-  
-  // 初期値入力
-  const min = ref(0);
-  const sec = ref(5);
-  // 開始ボタンが押されたかどうか
-  const timerOn = ref(false);
-  //setIntervalの返り値を入れておく変数止めるときに使う
-  const timerObj = ref(null);
-  //ゲーム中かどうか
-  const game = ref(true);
-  //サーバーとのやり取り成功か
-  const isSarver = ref(false);
+const socket = io();
 
-  //timerの色初期値は黒
-  const isColorRed = ref({
-        color: "black"
-  });
+// 初期値入力
+const min = ref(0);
+const sec = ref(5);
+// 開始ボタンが押されたかどうか
+const timerOn = ref(false);
+//setIntervalの返り値を入れておく変数止めるときに使う
+const timerObj = ref(null);
+//ゲーム中かどうか
+const game = ref(true);
+//サーバーとのやり取り成功か
+const isSarver = ref(false);
+
+//timerの色初期値は黒
+const isColorRed = ref({
+      color: "black"
+});
 
 
-  // min, secを動かす関数
-  const count = () =>{
-    if(sec.value === 1 && min.value === 1){//01:00から赤く、大きくなる
-      isColorRed.value = {
-        color: "red"
-      };
-    }
-    if(sec.value === 0 && min.value >= 1){//00秒かつ１分以上
-      min.value--;
-      sec.value = 59;
-      
-    }else if(sec.value === 0 && min.value === 0){//00:00のとき
-      complete();
-    }else{
-      sec.value--;
-    }
-  };
+// min, secを動かす関数
+const count = () => {
+  if (sec.value === 1 && min.value === 1) {//01:00から赤く、大きくなる
+    isColorRed.value = {
+      color: "red"
+    };
+  }
+  if (sec.value === 0 && min.value >= 1) {//00秒かつ１分以上
+    min.value--;
+    sec.value = 59;
 
-  //開始ボタンを押したとき1秒ごとにcount関数を呼び出すtimerOn, gameにtrueを入れる関数
-  const start = () =>{
-    socket.emit("start", "ゲームスタート");
-    timerObj.value = setInterval(count, 1000);
-    timerOn.value = true;
-    game.value = true;
-  };
-  //サーバーからスタートイベントが届いたら
-  socket.on("start", (data) =>{
-    timerObj.value = setInterval(count, 1000);
-    timerOn.value = true;
-    game.value = true;
-  });
+  } else if (sec.value === 0 && min.value === 0) {//00:00のとき
+    complete();
+  } else {
+    sec.value--;
+  }
+};
 
-  //ストップボタンを押したときsetIntervalを止めてtimerOnにfalseを入れる関数
-  const stop = () =>{
-    socket.emit("stop", "ゲームストップ");
-    clearInterval(timerObj.value);
-    timerOn.value = false;
-  };
+//開始ボタンを押したとき1秒ごとにcount関数を呼び出すtimerOn, gameにtrueを入れる関数
+const start = () => {
+  socket.emit("start", "ゲームスタート");
+  timerObj.value = setInterval(count, 1000);
+  timerOn.value = true;
+  game.value = true;
+};
+//サーバーからスタートイベントが届いたら
+socket.on("start", (data) => {
+  timerObj.value = setInterval(count, 1000);
+  timerOn.value = true;
+  game.value = true;
+});
+
+//ストップボタンを押したときsetIntervalを止めてtimerOnにfalseを入れる関数
+const stop = () => {
+  socket.emit("stop", "ゲームストップ");
+  clearInterval(timerObj.value);
+  timerOn.value = false;
+};
 
   //サーバーからストップイベントが届いたら
     socket.on("stop", (data) =>{
       clearInterval(timerObj.value);
       timerOn.value = false;
     });
+
+//時間が足りないときに1分プラスする関数
+const add = () => {
+  socket.emit("add", "1分追加");
+  min.value += 1;
+  isColorRed.value = {
+    color: "black"
+  };
+};
+socket.on("add", (data) => {
+  min.value += 1;
+  isColorRed.value = {
+    color: "black"
+  };
+});
+
+//formatTimeにmin:secの形で代入する
+const formatTime = computed(() => {
+  //配列timeStringsにmin, secをString型で入れる（mapを使って条件をプラスする）
+  const timeStrings = [min.value.toString(), sec.value.toString()].map(str => {
+    if (str.length < 2) {//一桁の時0を付ける
+      return "0" + str;
+    } else {
+      return str;
+    }
+  });
+  //配列を区切り文字":"で結合してのformatTimeに返す
+  return timeStrings;
+});
+
+  // ーーーーーーーーーーーーーーここから変更ーーーーーーーーーーーーーー
+
+  const userName = inject("userName")
+  const voteList = inject("voteList");
+  const showModal = inject("showModal");
+  let sent = false;
+  const router = useRouter()
+
+  const defReset = () => {
+    clearInterval(timerObj.value);
+    timerOn.value = false;
+    game.value = false;
+    min.value = 10;
+    sec.value = 0;
+  }
+
   //00:00か終了ボタンが押されたときsetIntervalを止めてgameをfalse,その他を初期値に戻す
+  // ▶▶ 0:00になった時のみの動作とする
   const complete = () =>{
-    socket.emit("finishDiscussion", "ゲーム終了");
-    clearInterval(timerObj.value);
-    timerOn.value = false;
-    game.value = false;
-    min.value = 10;
-    sec.value = 0;
+    defReset();
+    // 自分の名前を送り送信済みに
+    socket.emit("finishDiscussion", userName.value);
+    sent = true;
+    // もし他の人全員の名前を受け取り終わっていたら投票へ
+    if (voteList.length == 3) {
+      showModal.value = true;
+      router.push({ name: "vote" })
+      // ラグなどでループしないためにオフに
+      sent = false;
+    }
   };
-  //サーバーからストップイベントが届いたら
-  socket.on("finishDiscussion", (data) =>{
-    clearInterval(timerObj.value);
-    timerOn.value = false;
-    game.value = false;
-    min.value = 10;
-    sec.value = 0;
+
+  // 自分が終了ボタンを押したら
+  const endButton = () => {
+    defReset();
+    // 自分の名前を送り送信済みにする
+    socket.emit("endButtonSubmit", userName.value);
+    sent = true;
+  }
+
+  // サーバーからストップイベントが届いたら
+  // ▶▶　他の人が終了ボタンを押したら
+  socket.on("finish", (otherName) =>{
+    defReset();
+    // 終了ボタンを押した人の名前を受け取る
+    voteList.push(otherName);
+    // 自分の名前を送り送信済みにする
+    socket.emit("finishDiscussion", userName.value);
+    sent = true;
   });
 
-  //時間が足りないときに1分プラスする関数
-  const add = () =>{
-    socket.emit("add", "1分追加");
-    min.value += 1;
-    isColorRed.value = {
-      color: "black"
-    };
-  };
-  socket.on("add", (data) =>{
-    min.value += 1;
-    isColorRed.value = {
-      color: "black"
-    };
-  });
-
-  //formatTimeにmin:secの形で代入する
-  const formatTime = computed(() =>{
-    //配列timeStringsにmin, secをString型で入れる（mapを使って条件をプラスする）
-    const timeStrings = [min.value.toString(), sec.value.toString()].map(str =>{
-      if(str.length < 2 ){//一桁の時0を付ける
-        return "0" + str;
-      }else{
-        return str;
+  // 他の人の名前を受け取る
+  socket.on("submitMyName",(otherName) => {
+      voteList.push(otherName);
+      console.log(voteList);
+      // もし他の人全員の名前を受け取り終わっている、かつ、自分の名前を送り終えていたら投票へ
+      if ((voteList.length == 3) && (sent == true)) {
+        showModal.value = true;
+        router.push({ name: "vote" })
+        // ラグなどでループしないためにオフに
+        sent = false;
       }
-    });
-    //配列を区切り文字":"で結合してのformatTimeに返す
-    return timeStrings;
   });
 
 </script>
@@ -120,7 +168,7 @@
   <div class="timer">
     <div class="time" v-bind:style="[isColorRed]" v-if="game">
       {{ formatTime[0] }}
-      <span v-bind:class="{colon: timerOn}" >
+      <span v-bind:class="{ colon: timerOn }">
         :
       </span>
       {{ formatTime[1] }}
@@ -133,37 +181,47 @@
     <v-btn v-on:click="stop" v-if="timerOn" class="Button" color="#455A64" elevation="2">ストップ</v-btn>
     <!-- 追加ボタン（add関数を呼び出し）を表示 -->
     <v-btn v-on:click="add" class="Button" color="#455A64" elevation="2">１分追加</v-btn>
-    <v-btn v-on:click="complete" class="Button" color="#455A64" elevation="2">終了</v-btn>
+    <v-btn v-on:click="endButton" class="Button" color="#455A64" elevation="2">終了</v-btn>
   </div>
 </template>
 
 <style scoped>
-.timer{
+.timer {
   text-align: center;
-  width: 20%;
+  /* width: 20%; */
+  width: 10rem;
+  margin-left: 7.5rem;
 }
+
 .time {
   display: inline-block;
   font-size: 26px;
 }
 
-.colon{/**真ん中の：を点滅させる */
+.colon {
+  /**真ん中の：を点滅させる */
   animation: flash 1s ease infinite;
   animation-delay: 0.5s;
 }
-@keyframes flash{
-  0%, 100%{
+
+@keyframes flash {
+
+  0%,
+  100% {
     opacity: 1;
   }
-  50%{
+
+  50% {
     opacity: 0;
   }
 }
-.Button{
+
+.Button {
   margin: 5px 0;
   width: 100%;
 }
-.gameSet{
+
+.gameSet {
   font-size: 26px;
   color: red;
   margin-left: 10px;

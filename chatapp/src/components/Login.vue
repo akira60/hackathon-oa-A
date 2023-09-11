@@ -58,23 +58,25 @@ const onEnter = () => {
 </script>
 
 <template>
-  <div class="mx-auto ma-15 px-4">
-    <h1 class="text-h3 font-weight-medium">Login</h1>
-    <div class="mt-10">
-      <p>ユーザー名</p>
-      <input type="text" v-model="inputUserName" class="user-name-text" />
+  <div style="display: flex; align-items: center; justify-content: center; height: 50vh;">
+    <div style="width: 300px; text-align: center;">
+      <v-text-field 
+        label="ユーザ名"
+        v-model="inputUserName"
+        variant="solo-inverted"
+      ></v-text-field>
+      
+      <v-btn 
+        type="button" 
+        @click="onEnter"
+      >
+        入室する
+      </v-btn>
     </div>
-    <button type="button" @click="onEnter" class="button-normal">入室する</button>
   </div>
-
-   
-
 </template>
 
+
 <style scoped>
-.user-name-text {
-  width: 200px;
-  border: 1px solid #888;
-  margin-bottom: 16px;
-}
+
 </style>
