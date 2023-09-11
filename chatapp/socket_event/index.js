@@ -47,7 +47,7 @@ export default (io, socket) => {
 
   // 0:00の時名前を送る
   socket.on("finishDiscussion", (myName) => {
-    socket.broadcast.emit("submitMyName",myName);
+    socket.broadcast.emit("submitMyName", myName);
   })
 
   //終了ボタンを誰かが押したら
@@ -79,7 +79,8 @@ export default (io, socket) => {
   //　Cardテーブルの一列目を多数派、二列目を少数派、三列目をcategory_idとして取得
   io.on('connection', (socket) => {
     // なぜかクライアント側で何回も接続が起こっている。それを防ぐために1ユーザーあたりのjoinの回数を制限
-    if (!socket.listeners('join').length) {
+    // ４人以上になったらjoinイベントを受け付けない
+    if (!socket.listeners('join').length && userList.length < 4) {
 
 
       // ユーザーリストにユーザーを追加
@@ -92,12 +93,23 @@ export default (io, socket) => {
           socket.userName = userName;
           io.emit('updateUserList', userList);
         }
+
+      })
+
+      socket.on("userListBeforeLogin", () => {
+        io.emit('updateUserList', userList);
       })
 
       /* ここまで */
 
 
       socket.on('join', () => {
+        // すでにユーザー名が使われていたらエラーを返す
+        if (!socket.userName || userList.includes(socket.userName)) {
+          socket.emit('error');
+          return;
+        }
+
 
         // とりあえずデフォルト4人でスタート
         players.push(socket);
@@ -157,6 +169,7 @@ export default (io, socket) => {
       }
 
       io.emit('updateUserList', userList);
+      console.log(userList);
     });
   });
 
@@ -169,5 +182,5 @@ export default (io, socket) => {
     return array;
   }
 
-  
+
 }
