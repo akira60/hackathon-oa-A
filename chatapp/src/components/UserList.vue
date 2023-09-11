@@ -16,7 +16,7 @@ onMounted(() => {
 // 更新されたユーザーリストを受信
 socket.on("updateUserList", (users) => {
     userList.value = users;
-    console.log(userList.value);
+    // console.log(userList.value);
 });
 
 </script>

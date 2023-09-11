@@ -17,7 +17,14 @@ const router = createRouter({
     }, {
       path: "/test",
       name: "test",
-      component: TestMiki
+      component: TestMiki,
+      beforeEnter: (to, from, next) => {
+        if (from.name === "login") {
+          next()
+        } else {
+          next({ name: "login" })
+        }
+      }
     }, {
       path: "/chat/",
       name: "chat",
