@@ -14,7 +14,6 @@ const category = ref(null);
 
 // #endregion
 
-
 // #region lifecycle
 // onMounted(() => {
 //   registerSocketEvent()
@@ -40,21 +39,15 @@ onMounted(() => {
     });
 })
 
-
 onBeforeUnmount(() => {
     socket.disconnect();
     socket.off('receive-theme')
 });
 
-
-
 // 退室メッセージをサーバに送信する
 const onExit = () => {
     socket.emit("exitEvent", `${userName.value}さんが退室しました。`)
-
 }
-
-
 
 </script>
 

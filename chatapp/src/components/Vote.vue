@@ -81,7 +81,7 @@ socket.on("countVote", (voteName) => {
 			default:
 				mostPlayert = "エラー回避";
 			}
-			
+			selectedName = mostPlayer
 			// もし自分が狼だったら名前を送り負けの画面にする
 			if (whoWolf.value == "me") {
 				socket.emit("imwolf", userName.value);
@@ -118,31 +118,32 @@ socket.on("countVote", (voteName) => {
 <template>
 	<div>
 		<div class="box"></div>
-		<div id="result_win" class="block, heading-034">
+		<div hidden id="result_win" class="block, heading-034">
 			<h1>選ばれたのは…</h1>
 			<h1>{{ selectedName }}でした。</h1>
 			<h1>あなたは見事狼を当てました！</h1>
 		</div>
 
-		<div hidden id="result_lose" class="block">
-			<h3>選ばれたのは…</h3>
+		<div hidden id="result_lose" class="block, heading-034">
+			<h1>選ばれたのは…</h1>
 			<h1>{{ selectedName }}でした。</h1>
-			<h3>ですが狼ではなかったようです…</h3>
+			<h1>ですが狼ではなかったようです…</h1>
 		</div>
 
-		<div hidden id="result_escape" class="block">
+		<div hidden id="result_escape" class="block, heading-034">
 			<h1>狼に逃げられてしまいました...</h1>
 			<h1>投票数が同じになってしまったようです</h1>
+			<h1></h1>
 		</div>
 		
 		<div v-if="showModal" id="overlay">
-			<div id="waiting" hidden>
+			<div id="waiting" class="contents" hidden>
 				<h3>あなたは怪しい人を指名しました。</h3>
 				<h3>票が集まるまで待ちましょう。</h3>
 			</div>
-			<div id="contents">
-				<h3>誰がワードウルフ？</h3>
-				<img src="../images/question.png" alt="question" class="question">
+			<div id="contents" class="contents">
+				<h2 class="heading-031">誰がワードウルフ？</h2>
+				<!-- <img src="../images/question.png" alt="question" class="question"> -->
 				<br>
 				<div class="button-container">
 					<button v-for="name in voteList" :key="name" @click="clickName(name)">{{ name }}</button>
@@ -190,7 +191,7 @@ socket.on("countVote", (voteName) => {
 	justify-content: center;
 }
 
-#contents {
+.contents {
 	z-index: 2;
 	width: 752px;
 	padding: 40px;
@@ -206,6 +207,37 @@ socket.on("countVote", (voteName) => {
 	width: 576px;
 }
 
+.heading-031 {
+    position: relative;
+    padding: .3em 0 .2em 1em;
+    border-bottom: 3px solid #2589d0;
+    color: #ffffff;
+    width: 300px;
+    margin-left: 30%;
+}
+
+.heading-031::before {
+    position: absolute;
+    top: 0;
+    left: .3em;
+    transform: rotate(55deg);
+    height: 11px;
+    width: 12px;
+    background: #2589d0;
+    content: '';
+}
+
+.heading-031::after {
+    position: absolute;
+    transform: rotate(15deg);
+    top: .6em;
+    left: 0;
+    height: 8px;
+    width: 8px;
+    background: #2589d0;
+    content: '';
+}
+
 .box{
 	height: 50px;
 }
@@ -214,28 +246,13 @@ socket.on("countVote", (voteName) => {
 	top: 100px;
 	left: calc(50% - 450px / 2);
 }
-/* #result_win {
-  background-color: #ffdb58;
-  color: #ff6b81;
-  font-family: 'Arial Rounded MT Bold', sans-serif;
-  text-align: center;
-  padding: 20px;
-  border-radius: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  display: inline-block;
-  position: relative;
-}
-
-#result_win h1 {
-  font-size: 28px;
-  margin: 10px 0;
-} */
 .heading-034 {
     position: relative;
-    margin: 0 0 25px 9px;
+    margin: 0 0 25px calc(50% - 500px / 2);
     padding: .5em .8em;
     background-color: rgb(251, 192, 45);
     color: #fff;
+    width: 40%;
 }
 
 .heading-034::before {
@@ -250,8 +267,8 @@ socket.on("countVote", (voteName) => {
     content: '';
 }
 
-.heading-034 span::before,
-.heading-034 span::after {
+.heading-034 h1::before,
+.heading-034 h1::after {
     position: absolute;
     left: -9px;
     width: 20px;
@@ -261,12 +278,12 @@ socket.on("countVote", (voteName) => {
     content: '';
 }
 
-.heading-034 span::before {
+.heading-034 h1::before {
     top: 44%;
     transform: rotate(-25deg);
 }
 
-.heading-034 span::after {
+.heading-034 h1::after {
     top: 54%;
     transform: rotate(25deg);
 }

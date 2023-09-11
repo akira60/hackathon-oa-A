@@ -38,13 +38,11 @@ const onPublish = () => {
   chatContent.value = ""
   socket.emit("publishEvent",sendText)
 
-
 }
 
 // 退室メッセージをサーバに送信する
 const onExit = () => {
   socket.emit("exitEvent", `${userName.value}さんが退室しました。`)
-
 }
 
 // メモを画面上に表示する
@@ -85,7 +83,6 @@ const registerSocketEvent = () => {
 
   // 投稿イベントを受け取ったら実行
   socket.on("publishEvent", (data) => {
-
   })
 }
 

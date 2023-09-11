@@ -117,11 +117,6 @@
   // ▶▶ 0:00になった時のみの動作とする
   const complete = () =>{
     defReset();
-    // clearInterval(timerObj.value);
-    // timerOn.value = false;
-    // game.value = false;
-    // min.value = 10;
-    // sec.value = 0;
     // 自分の名前を送り送信済みに
     socket.emit("finishDiscussion", userName.value);
     sent = true;
@@ -137,11 +132,6 @@
   // 自分が終了ボタンを押したら
   const endButton = () => {
     defReset();
-    // clearInterval(timerObj.value);
-    // timerOn.value = false;
-    // game.value = false;
-    // min.value = 10;
-    // sec.value = 0;
     // 自分の名前を送り送信済みにする
     socket.emit("endButtonSubmit", userName.value);
     sent = true;
@@ -151,11 +141,6 @@
   // ▶▶　他の人が終了ボタンを押したら
   socket.on("finish", (otherName) =>{
     defReset();
-    // clearInterval(timerObj.value);
-    // timerOn.value = false;
-    // game.value = false;
-    // min.value = 10;
-    // sec.value = 0;
     // 終了ボタンを押した人の名前を受け取る
     voteList.push(otherName);
     // 自分の名前を送り送信済みにする
