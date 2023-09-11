@@ -28,7 +28,6 @@ provide("whoWolf", whoWolf)
 
     <div class="container">
       <router-view />
-      <img src="./images/wolf.png" alt="Overlay Image">
     </div>
 
   </v-app>

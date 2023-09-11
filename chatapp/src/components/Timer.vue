@@ -4,98 +4,99 @@
   import io from "socket.io-client";
   import { useRouter } from "vue-router"
 
-  const socket = io();
-  
-  // 初期値入力
-  const min = ref(0);
-  const sec = ref(5);
-  // 開始ボタンが押されたかどうか
-  const timerOn = ref(false);
-  //setIntervalの返り値を入れておく変数止めるときに使う
-  const timerObj = ref(null);
-  //ゲーム中かどうか
-  const game = ref(true);
-  //サーバーとのやり取り成功か
-  const isSarver = ref(false);
+const socket = io();
 
-  //timerの色初期値は黒
-  const isColorRed = ref({
-        color: "black"
-  });
+// 初期値入力
+const min = ref(0);
+const sec = ref(5);
+// 開始ボタンが押されたかどうか
+const timerOn = ref(false);
+//setIntervalの返り値を入れておく変数止めるときに使う
+const timerObj = ref(null);
+//ゲーム中かどうか
+const game = ref(true);
+//サーバーとのやり取り成功か
+const isSarver = ref(false);
 
-  // min, secを動かす関数
-  const count = () =>{
-    if(sec.value === 1 && min.value === 1){//01:00から赤く、大きくなる
-      isColorRed.value = {
-        color: "red"
-      };
-    }
-    if(sec.value === 0 && min.value >= 1){//00秒かつ１分以上
-      min.value--;
-      sec.value = 59;
-      
-    }else if(sec.value === 0 && min.value === 0){//00:00のとき
-      complete();
-    }else{
-      sec.value--;
-    }
-  };
+//timerの色初期値は黒
+const isColorRed = ref({
+      color: "black"
+});
 
-  //開始ボタンを押したとき1秒ごとにcount関数を呼び出すtimerOn, gameにtrueを入れる関数
-  const start = () =>{
-    socket.emit("start", "ゲームスタート");
-    timerObj.value = setInterval(count, 1000);
-    timerOn.value = true;
-    game.value = true;
-  };
-  //サーバーからスタートイベントが届いたら
-  socket.on("start", (data) =>{
-    timerObj.value = setInterval(count, 1000);
-    timerOn.value = true;
-    game.value = true;
-  });
 
-  //ストップボタンを押したときsetIntervalを止めてtimerOnにfalseを入れる関数
-  const stop = () =>{
-    socket.emit("stop", "ゲームストップ");
-    clearInterval(timerObj.value);
-    timerOn.value = false;
-  };
+// min, secを動かす関数
+const count = () => {
+  if (sec.value === 1 && min.value === 1) {//01:00から赤く、大きくなる
+    isColorRed.value = {
+      color: "red"
+    };
+  }
+  if (sec.value === 0 && min.value >= 1) {//00秒かつ１分以上
+    min.value--;
+    sec.value = 59;
+
+  } else if (sec.value === 0 && min.value === 0) {//00:00のとき
+    complete();
+  } else {
+    sec.value--;
+  }
+};
+
+//開始ボタンを押したとき1秒ごとにcount関数を呼び出すtimerOn, gameにtrueを入れる関数
+const start = () => {
+  socket.emit("start", "ゲームスタート");
+  timerObj.value = setInterval(count, 1000);
+  timerOn.value = true;
+  game.value = true;
+};
+//サーバーからスタートイベントが届いたら
+socket.on("start", (data) => {
+  timerObj.value = setInterval(count, 1000);
+  timerOn.value = true;
+  game.value = true;
+});
+
+//ストップボタンを押したときsetIntervalを止めてtimerOnにfalseを入れる関数
+const stop = () => {
+  socket.emit("stop", "ゲームストップ");
+  clearInterval(timerObj.value);
+  timerOn.value = false;
+};
 
   //サーバーからストップイベントが届いたら
-  socket.on("stop", (data) =>{
-    clearInterval(timerObj.value);
-    timerOn.value = false;
-  });
-
-  //時間が足りないときに1分プラスする関数
-  const add = () =>{
-    socket.emit("add", "1分追加");
-    min.value += 1;
-    isColorRed.value = {
-      color: "black"
-    };
-  };
-  socket.on("add", (data) =>{
-    min.value += 1;
-    isColorRed.value = {
-      color: "black"
-    };
-  });
-
-  //formatTimeにmin:secの形で代入する
-  const formatTime = computed(() =>{
-    //配列timeStringsにmin, secをString型で入れる（mapを使って条件をプラスする）
-    const timeStrings = [min.value.toString(), sec.value.toString()].map(str =>{
-      if(str.length < 2 ){//一桁の時0を付ける
-        return "0" + str;
-      }else{
-        return str;
-      }
+    socket.on("stop", (data) =>{
+      clearInterval(timerObj.value);
+      timerOn.value = false;
     });
-    //配列を区切り文字":"で結合してのformatTimeに返す
-    return timeStrings;
+
+//時間が足りないときに1分プラスする関数
+const add = () => {
+  socket.emit("add", "1分追加");
+  min.value += 1;
+  isColorRed.value = {
+    color: "black"
+  };
+};
+socket.on("add", (data) => {
+  min.value += 1;
+  isColorRed.value = {
+    color: "black"
+  };
+});
+
+//formatTimeにmin:secの形で代入する
+const formatTime = computed(() => {
+  //配列timeStringsにmin, secをString型で入れる（mapを使って条件をプラスする）
+  const timeStrings = [min.value.toString(), sec.value.toString()].map(str => {
+    if (str.length < 2) {//一桁の時0を付ける
+      return "0" + str;
+    } else {
+      return str;
+    }
   });
+  //配列を区切り文字":"で結合してのformatTimeに返す
+  return timeStrings;
+});
 
   // ーーーーーーーーーーーーーーここから変更ーーーーーーーーーーーーーー
 
@@ -167,7 +168,7 @@
   <div class="timer">
     <div class="time" v-bind:style="[isColorRed]" v-if="game">
       {{ formatTime[0] }}
-      <span v-bind:class="{colon: timerOn}" >
+      <span v-bind:class="{ colon: timerOn }">
         :
       </span>
       {{ formatTime[1] }}
@@ -185,32 +186,42 @@
 </template>
 
 <style scoped>
-.timer{
+.timer {
   text-align: center;
-  width: 20%;
+  /* width: 20%; */
+  width: 10rem;
+  margin-left: 7.5rem;
 }
+
 .time {
   display: inline-block;
   font-size: 26px;
 }
 
-.colon{/**真ん中の：を点滅させる */
+.colon {
+  /**真ん中の：を点滅させる */
   animation: flash 1s ease infinite;
   animation-delay: 0.5s;
 }
-@keyframes flash{
-  0%, 100%{
+
+@keyframes flash {
+
+  0%,
+  100% {
     opacity: 1;
   }
-  50%{
+
+  50% {
     opacity: 0;
   }
 }
-.Button{
+
+.Button {
   margin: 5px 0;
   width: 100%;
 }
-.gameSet{
+
+.gameSet {
   font-size: 26px;
   color: red;
   margin-left: 10px;

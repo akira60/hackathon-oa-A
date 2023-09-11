@@ -54,15 +54,20 @@ const onExit = () => {
 <template>
     <!-- <div class="mx-auto my-5 px-4"> -->
     <!-- <h1 class="text-h3 font-weight-medium">Vue.js Chat チャットルーム</h1> -->
-    <div class="mt-10">
-        <div class="login_user">ログインユーザ：{{ userName }}さん</div>
+    <div>
+        <p>ログインユーザ：{{ userName }}さん</p>
         <v-card color="#455A64" elevation="2" class="category-theme-card">
             <div v-if="category" class="category-text">{{ category }}</div>
             <div v-if="theme" class="theme-text">{{ theme }}</div>
             <div v-else class="theme-waiting">他の人が接続するのを<br>待っています</div>
         </v-card>
         <router-link to="/" class="link">
-            <button type="button" class="button-normal button-exit" @click="onExit">退室する</button>
+            <v-btn 
+                type="button" 
+                @click="onExit" 
+                class="mt-10">
+                退室する
+            </v-btn>
         </router-link>
     </div>
 </template>
@@ -95,7 +100,7 @@ const onExit = () => {
     margin-top: 10px;
     padding: 32px;
     position: relative;
-    width: 20rem;
+    width: 15rem;
 
 }
 
