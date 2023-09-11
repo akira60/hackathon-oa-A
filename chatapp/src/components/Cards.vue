@@ -96,7 +96,6 @@ const onExit = () => {
     padding: 32px;
     position: relative;
     width: 15rem;
-    margin-right: 5rem;
 
 }
 

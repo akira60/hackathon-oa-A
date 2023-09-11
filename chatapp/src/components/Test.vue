@@ -28,7 +28,7 @@ export default {
 
   </div>
 -->
-  <v-container class="ma-15">
+  <v-container class="mt-15">
     <v-row>
       <v-col cols="3" class="mt-10 ">
         <Cards />
