@@ -10,5 +10,5 @@ npm install sqlite3
 もし入っていなければ次のコマンドを実行
 ```
 cd db // dbディレクトリに移動
-node index.js
+node wordSet.js
 ```
