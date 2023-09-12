@@ -6,18 +6,19 @@ const userName = inject("userName");
 const userList = ref([]);
 const socket = io();
 
-
+let activeUserList = inject("activeUserList")
 
 // 接続したときユーザー名を送信
 onMounted(() => {
     socket.emit("userList", userName.value);
+    // 更新されたユーザーリストを受信
+    socket.on("updateUserList", (users) => {
+        userList.value = users;
+        console.log(userList.value);
+    });
 });
 
-// 更新されたユーザーリストを受信
-socket.on("updateUserList", (users) => {
-    userList.value = users;
-    console.log(userList.value);
-});
+
 
 </script>
 
@@ -25,7 +26,7 @@ socket.on("updateUserList", (users) => {
     <div v-if="userList" class="user_list">
         <div class="user_name">ユーザ一覧</div>
         <ul class='users'>
-            <li v-for="(user, index) in userList" :key="index">
+            <li v-for="(user, index) in activeUserList" :key="index">
                 {{ user }}
             </li>
         </ul>

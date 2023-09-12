@@ -47,7 +47,7 @@ export default (io, socket) => {
 
   // 0:00の時名前を送る
   socket.on("finishDiscussion", (myName) => {
-    socket.broadcast.emit("submitMyName",myName);
+    socket.broadcast.emit("submitMyName", myName);
   })
 
   //終了ボタンを誰かが押したら
@@ -73,7 +73,7 @@ export default (io, socket) => {
     console.log("receiveWolftheme 動いてます！")
     socket.broadcast.emit("receiveWolftheme", wolf);
   });
-  
+
   socket.on("submitHumantheme", (human) => {
     console.log("piyopiyo")
     socket.broadcast.emit("receiveHumantheme", human);
@@ -104,10 +104,18 @@ export default (io, socket) => {
         }
       })
 
+
+      socket.on("userListBeforeLogin", () => {
+        io.emit('updateUserList', userList);
+        console.log(userList);
+      })
+
+
       /* ここまで */
 
 
       socket.on('join', () => {
+
 
         // とりあえずデフォルト4人でスタート
         players.push(socket);
@@ -179,5 +187,5 @@ export default (io, socket) => {
     return array;
   }
 
-  
+
 }
