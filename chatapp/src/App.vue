@@ -1,5 +1,5 @@
 <script setup>
-import { provide, ref ,reactive} from "vue"
+import { provide, ref, reactive } from "vue"
 
 // #region reactive state
 const userName = ref("")
@@ -7,6 +7,7 @@ const voteList = reactive([]);
 const showModal = ref(false);
 const whoWolf = ref("");
 const theme = ref(null);
+const activeUserList = ref([]);
 // #endregion
 
 // #region global variable
@@ -15,6 +16,7 @@ provide("voteList", voteList)
 provide("showModal", showModal)
 provide("whoWolf", whoWolf)
 provide("theme", theme)
+provide("activeUserList", activeUserList)
 // #endregion
 
 </script>
@@ -33,7 +35,6 @@ provide("theme", theme)
     </div>
 
   </v-app>
-
 </template>
 
 <style scoped>

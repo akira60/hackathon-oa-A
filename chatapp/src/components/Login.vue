@@ -1,5 +1,5 @@
 <script setup>
-import { inject, ref } from "vue"
+import { inject, ref, onMounted } from "vue"
 import { useRouter } from "vue-router"
 import io from "socket.io-client"
 
@@ -7,6 +7,7 @@ import io from "socket.io-client"
 
 // #region global state
 let userName = inject("userName")
+let activeUserList = inject("activeUserList")
 // #endregion
 
 // #region local variable
@@ -18,16 +19,32 @@ const socket = io()
 const inputUserName = ref("")
 // #endregion
 
-// #region browser event handler
+const userList = ref([]);
 
 // const myPlayerName = inject("myPlayerName")
+onMounted(() => {
+  socket.emit("userListBeforeLogin")
+  socket.on("updateUserList", (users) => {
+    userList.value = users;
+    console.log(userList.value);
+    // UserList.vueにactiveUserを渡す
+    activeUserList.value = userList.value
+  });
+})
 
 // 入室メッセージをクライアントに送信する
 const onEnter = () => {
-  // ユーザー名が入力されているかチェック
+  // userListに入力されたユーザー名が含まれているか確認
+  socket.emit("userList", inputUserName.value)
 
+  // ユーザー名が入力されているかチェック
   if (inputUserName.value.trim() === "") {
     alert('ユーザー名を入力してください。')
+    return;
+  }
+  if (userList.value.includes(inputUserName.value)) {
+    alert('そのユーザー名は既に使用されています。')
+    return;
   }
   // 入室メッセージを送信
   else {
@@ -60,6 +77,7 @@ const onEnter = () => {
 <template>
   <div style="display: flex; align-items: center; justify-content: center; height: 50vh;">
     <div style="width: 300px; text-align: center;">
+
       <v-text-field 
         label="ユーザ名"
         v-model="inputUserName"
@@ -71,6 +89,7 @@ const onEnter = () => {
         type="button" 
         @click="onEnter"
       >
+
         入室する
       </v-btn>
     </div>
@@ -78,6 +97,4 @@ const onEnter = () => {
 </template>
 
 
-<style scoped>
-
-</style>
+<style scoped></style>
