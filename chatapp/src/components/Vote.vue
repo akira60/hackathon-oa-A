@@ -1,11 +1,12 @@
 <script setup>
-import { inject, ref } from "vue"         //ーーーーーref追加ーーーーー
+import { inject, ref } from "vue"
 import io from "socket.io-client"
 const userName = inject("userName");
 const whoWolf = inject("whoWolf");
-const theme = inject("theme");         //ーーーーー追加ーーーーー
-const wolftheme = ref("");          //ーーーーー追加ーーーーー
-const humantheme = ref("");         //ーーーーー追加ーーーーー
+const theme = inject("theme");
+const wolftheme = ref("");
+const humantheme = ref("");
+const wolf_name = ref("");
 
 const socket = io();
 
@@ -31,6 +32,24 @@ const clickName = (voteName) => {
 		divContents.setAttribute("hidden","");
 		divWaiting.removeAttribute("hidden")
 	}
+};
+
+const wolfInfo = () => {
+	wolf_name.value = userName.value
+	socket.emit("imwolf", userName.value);
+	socket.emit("submitWolftheme", theme.value);
+		wolftheme.value = theme.value;
+	socket.on("receiveHumantheme", (data) => {
+		humantheme.value = data;
+	})
+};
+
+const humanInfo = () => {
+	socket.emit("submitHumantheme", theme.value);
+	socket.on("receiveWolftheme", (data) => {
+		wolftheme.value = data;
+		humantheme.value = theme.value;
+	});
 };
 
 let player1 = 0;
@@ -85,25 +104,29 @@ socket.on("countVote", (voteName) => {
 				mostPlayert = "エラー回避";
 			}
 			selectedName = mostPlayer
-			// もし自分が狼だったら名前を送り負けの画面にする
+			// もし自分が狼だったら名前とテーマを送る
 			if (whoWolf.value == "me") {
-				socket.emit("imwolf", userName.value);
-				socket.emit("submitWolftheme", theme.value);         //ーーーーー追加ーーーーー
-					wolftheme.value = theme.value;
-				socket.on("receiveHumantheme", (data) => {         //ーーーーー追加ーーーーー
-					humantheme.value = data;                    //ーーーーー追加ーーーーー
-				})
-				showModal.value = false;
-				let resultLose = document.getElementById("result_lose");
-				resultLose.removeAttribute("hidden");
+				wolfInfo();
+				// 狼と当てられていた場合負け、そうでなければ勝ち
+				if (selectedName == userName.value) {
+					showModal.value = false;
+					let resultWolfLose = document.getElementById("result_wolflose");
+					resultWolfLose.removeAttribute("hidden");
+				} else {
+					showModal.value = false;
+					let resultWolfWin = document.getElementById("result_wolfwin");
+					resultWolfWin.removeAttribute("hidden");
+				}
 			// 自分が狼ではなかったら
 			} else {
+				humanInfo();
 				socket.on("submitWolf", (wolfName) => {
+					wolf_name.value = wolfName;
 					// 狼を当てられていたら勝ちの画面にする
 					if (wolfName == mostPlayer) {
 						showModal.value = false;
-						let resultLose = document.getElementById("result_win");
-						resultLose.removeAttribute("hidden");
+						let resultWin = document.getElementById("result_win");
+						resultWin.removeAttribute("hidden");
 					// 狼ではない人だったら負けの画面にする
 					} else {
 						showModal.value = false;
@@ -111,17 +134,23 @@ socket.on("countVote", (voteName) => {
 						resultLose.removeAttribute("hidden");
 					}
 				});
-				socket.emit("submitHumantheme", theme.value);
-				socket.on("receiveWolftheme", (data) => {         //ーーーーー追加ーーーーー
-					wolftheme.value = data;
-					humantheme.value = theme.value;
-				})
 			}
 		} else {
-			// 最多投票数を持つプレイヤーが複数いた場合逃げられた（勝負は負け）の画面にする
-			showModal.value = false;
-			let resultLose = document.getElementById("result_escape");
-			resultLose.removeAttribute("hidden");
+			if (whoWolf.value == "me") {
+				wolfInfo();
+				showModal.value = false;
+				let resultImEscape = document.getElementById("result_imescape");
+				resultImEscape.removeAttribute("hidden");
+			} else {
+				// 最多投票数を持つプレイヤーが複数いた場合逃げられた（勝負は負け）の画面にする
+				humanInfo();
+				socket.on("submitWolf", (wolfName) => {
+					wolf_name.value = wolfName;
+					showModal.value = false;
+					let resultEscape = document.getElementById("result_escape");
+					resultEscape.removeAttribute("hidden");
+				});
+			}
 		}
 	}
 });
@@ -132,23 +161,49 @@ socket.on("countVote", (voteName) => {
 	<div class="ma-10">
 		<div class="box"></div>
 		<div hidden id="result_win" class="block, heading-034">
-			<h1>選ばれたのは…</h1>
-			<h1>{{ selectedName }}でした。</h1>
-			<h1>あなたは見事狼を当てました！</h1>
-			<h4>狼のテーマ{{ wolftheme }}　他の人のテーマ{{ humantheme }}</h4>         <!-- ーーーーー追加ーーーーー -->
+			<h2>選ばれたのは…</h2>
+			<h1>{{ selectedName }}さんでした。</h1>
+			<h2>あなたは見事狼を当てました！</h2>
+			<br>
+			<h4>狼のテーマ：{{ wolftheme }}　他の人のテーマ：{{ humantheme }}<br>狼：{{ wolf_name }}さん</h4>
 		</div>
 
 		<div hidden id="result_lose" class="block, heading-034">
-			<h1>選ばれたのは…</h1>
-			<h1>{{ selectedName }}でした。</h1>
-			<h1>ですが狼ではなかったようです…</h1>
-			<h4>狼のテーマ{{ wolftheme }}　他の人のテーマ{{ humantheme }}</h4>         <!-- ーーーーー追加ーーーーー -->
+			<h2>選ばれたのは…</h2>
+			<h1>{{ selectedName }}さんでした。</h1>
+			<h2>ですが狼ではなかったようです…</h2>
+			<br>
+			<h4>狼のテーマ：{{ wolftheme }}　他の人のテーマ：{{ humantheme }}<br>狼：{{ wolf_name }}さん</h4>
+		</div>
+
+		<div hidden id="result_wolfwin" class="block, heading-034">
+			<h2>選ばれたのは…</h2>
+			<h1>{{ selectedName }}さんでした。</h1>
+			<h2>あなたは狼でした、そして逃げ切りました</h2>
+			<br>
+			<h4>狼のテーマ：{{ wolftheme }}　他の人のテーマ：{{ humantheme }}<br>狼：{{ wolf_name }}さん</h4>
+		</div>
+
+		<div hidden id="result_wolflose" class="block, heading-034">
+			<h2>選ばれたのは…</h2>
+			<h1>{{ selectedName }}さんでした。</h1>
+			<h2>あなたは狼でした、そしてバレました</h2>
+			<br>
+			<h4>狼のテーマ：{{ wolftheme }}　他の人のテーマ：{{ humantheme }}<br>狼：{{ wolf_name }}さん</h4>
+		</div>
+
+		<div hidden id="result_imescape" class="block, heading-034">
+			<h2>投票数が同じだったようです</h2>
+			<h2>見事あなたは逃げきりました</h2>
+			<br>
+			<h4>狼のテーマ：{{ wolftheme }}　他の人のテーマ：{{ humantheme }}<br>狼：{{ wolf_name }}さん</h4>
 		</div>
 
 		<div hidden id="result_escape" class="block, heading-034">
-			<h1>狼に逃げられてしまいました...</h1>
-			<h1>投票数が同じになってしまったようです</h1>
-			<h4>狼のテーマ{{ wolftheme }}　他の人のテーマ{{ humantheme }}</h4>         <!-- ーーーーー追加ーーーーー -->
+			<h2>狼に逃げられてしまいました...</h2>
+			<h2>投票数が同じになってしまったようです</h2>
+			<br>
+			<h4>狼のテーマ：{{ wolftheme }}　他の人のテーマ：{{ humantheme }}<br>狼：{{ wolf_name }}さん</h4>
 		</div>
 		
 		<div v-if="showModal" id="overlay">
