@@ -64,6 +64,7 @@ const onEnter = () => {
         label="ユーザ名"
         v-model="inputUserName"
         variant="solo-inverted"
+        @keydown.enter="onEnter"
       ></v-text-field>
       
       <v-btn 
