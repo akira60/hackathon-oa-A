@@ -8,7 +8,7 @@ const socket = io();
 
 // 初期値入力
 const min = ref(0);
-const sec = ref(5);
+const sec = ref(20);
 // 開始ボタンが押されたかどうか
 const timerOn = ref(false);
 //setIntervalの返り値を入れておく変数止めるときに使う
@@ -17,6 +17,9 @@ const timerObj = ref(null);
 const game = ref(true);
 //サーバーとのやり取り成功か
 const isSarver = ref(false);
+//残り10秒以下かどうか
+const tenSec = ref(false);
+
 
 //timerの色初期値は黒
 const isColorRed = ref({
@@ -26,10 +29,24 @@ const isColorRed = ref({
 
 // min, secを動かす関数
 const count = () => {
-  if (sec.value === 1 && min.value === 1) {//01:00から赤く、大きくなる
+  if(min.value >= 1){
+    isColorRed.value = {
+      color: "brack"
+    };
+  }
+  if(min.value === 1 && sec.value === 1){
     isColorRed.value = {
       color: "red"
     };
+  }
+  if (min.value < 1) {//01:00から赤く、大きくなる
+    isColorRed.value = {
+      color: "red"
+    };
+  }
+
+  if(sec.value <= 16 && min.value === 0){
+    tenSec.value = true;
   }
   if (sec.value === 0 && min.value >= 1) {//00秒かつ１分以上
     min.value--;
@@ -61,6 +78,7 @@ const stop = () => {
   socket.emit("stop", "ゲームストップ");
   clearInterval(timerObj.value);
   timerOn.value = false;
+  tenSec.value = false;
 };
 
   //サーバーからストップイベントが届いたら
@@ -76,14 +94,29 @@ const add = () => {
   isColorRed.value = {
     color: "black"
   };
+  tenSec.value = false;
 };
 socket.on("add", (data) => {
   min.value += 1;
-  isColorRed.value = {
-    color: "black"
-  };
+  tenSec.value = false;
+  tenSec.value = false;
 });
 
+const subtract = () => {
+  if(min.value > 0){
+    socket.emit("subtract", "1分削減");
+    min.value -= 1;
+    if(min.value === 0 && sec.value <= 15){
+    tenSec.value = true;
+    }
+  }
+};
+socket.on("subtract", (data) => {
+  min.value -= 1;
+  if(min.value === 0 && sec.value <= 15){
+    tenSec.value = true;  
+  }
+});
 //formatTimeにmin:secの形で代入する
 const formatTime = computed(() => {
   //配列timeStringsにmin, secをString型で入れる（mapを使って条件をプラスする）
@@ -132,10 +165,12 @@ const formatTime = computed(() => {
 
   // 自分が終了ボタンを押したら
   const endButton = () => {
-    defReset();
-    // 自分の名前を送り送信済みにする
-    socket.emit("endButtonSubmit", userName.value);
-    sent = true;
+    if(confirm("終了しますか？")){
+      defReset();
+      // 自分の名前を送り送信済みにする
+      socket.emit("endButtonSubmit", userName.value);
+      sent = true;
+    }
   }
 
   // サーバーからストップイベントが届いたら
@@ -166,7 +201,7 @@ const formatTime = computed(() => {
 
 <template>
   <div class="timer">
-    <div class="time" v-bind:style="[isColorRed]" v-if="game">
+    <div class="time" v-bind:style="[isColorRed]" v-if="game" v-bind:class="{bound: tenSec}">
       {{ formatTime[0] }}
       <span v-bind:class="{ colon: timerOn }">
         :
@@ -179,8 +214,9 @@ const formatTime = computed(() => {
     <!-- timerOnがfalseの時開始（start関数呼び出し）、trueの時ストップ（stop関数呼び出し）ボタンを表示 -->
     <v-btn v-on:click="start" v-if="!timerOn" class="Button" color="#455A64" elevation="2">スタート</v-btn>
     <v-btn v-on:click="stop" v-if="timerOn" class="Button" color="#455A64" elevation="2">ストップ</v-btn>
-    <!-- 追加ボタン（add関数を呼び出し）を表示 -->
-    <v-btn v-on:click="add" class="Button" color="#455A64" elevation="2">１分追加</v-btn>
+    <!-- 追加/削減ボタン（add/subtract関数を呼び出し）を表示 -->
+    <v-btn v-on:click="subtract" class="Button2" color="#455A64" elevation="2">-１分</v-btn>
+    <v-btn v-on:click="add" class="Button3" color="#455A64" elevation="2">+１分</v-btn>
     <v-btn v-on:click="endButton" class="Button" color="#455A64" elevation="2">終了</v-btn>
   </div>
 </template>
@@ -195,7 +231,20 @@ const formatTime = computed(() => {
 
 .time {
   display: inline-block;
+  margin-bottom: 10px;
   font-size: 26px;
+}
+
+.bound{
+  animation: bounce-in 1s infinite;
+}
+@keyframes bounce-in {
+  0%, 100%{
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.8);
+  }
 }
 
 .colon {
@@ -220,9 +269,15 @@ const formatTime = computed(() => {
   margin: 5px 0;
   width: 100%;
 }
-
+.Button2{
+  margin-right: 6px;
+  width: 48%;
+}
+.Button3{
+  width: 48%;
+}
 .gameSet {
-  font-size: 26px;
+  font-size: 50px;
   color: red;
   margin-left: 10px;
 }

@@ -77,9 +77,19 @@ const onEnter = () => {
 <template>
   <div style="display: flex; align-items: center; justify-content: center; height: 50vh;">
     <div style="width: 300px; text-align: center;">
-      <v-text-field label="ユーザ名" v-model="inputUserName" variant="solo-inverted"></v-text-field>
 
-      <v-btn type="button" @click="onEnter">
+      <v-text-field 
+        label="ユーザ名"
+        v-model="inputUserName"
+        variant="solo-inverted"
+        @keydown.enter="onEnter"
+      ></v-text-field>
+      
+      <v-btn 
+        type="button" 
+        @click="onEnter"
+      >
+
         入室する
       </v-btn>
     </div>

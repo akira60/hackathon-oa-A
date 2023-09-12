@@ -44,7 +44,14 @@ export default (io, socket) => {
     }
     socket.broadcast.emit("add", data);
   });
-
+  //1分追加ボタンが押された
+  socket.on("subtract", (data) => {
+    console.log(data);
+    if (!data) {
+      return;
+    }
+    socket.broadcast.emit("subtract", data);
+  });
   // 0:00の時名前を送る
   socket.on("finishDiscussion", (myName) => {
     socket.broadcast.emit("submitMyName", myName);
